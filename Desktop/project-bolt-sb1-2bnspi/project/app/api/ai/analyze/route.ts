@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit } from '@/lib/rate-limit';
+import { validateAnalysisResult } from '@/lib/ai/analysis';
 
 const rateLimiter = rateLimit({ limit: 10, windowMs: 60000 });
 
@@ -7,7 +8,7 @@ export async function POST(req: NextRequest) {
   try {
     // Apply rate limiting
     const rateLimitResult = await rateLimiter(req);
-    if (rateLimitResult.status === 429) {
+    if (rateLimitResult?.status === 429) {
       return rateLimitResult;
     }
 
@@ -68,8 +69,9 @@ export async function POST(req: NextRequest) {
 
     const data = await response.json();
     const result = JSON.parse(data.choices[0].message.content);
+    const validatedResult = validateAnalysisResult(result);
 
-    return NextResponse.json(result);
+    return NextResponse.json(validatedResult);
   } catch (error) {
     console.error('AI Analysis API Error:', error);
     return NextResponse.json(

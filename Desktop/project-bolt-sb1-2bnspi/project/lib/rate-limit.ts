@@ -9,9 +9,8 @@ const ipRequests = new Map<string, { count: number; resetTime: number }>();
 
 export function rateLimit(config: RateLimitConfig) {
   return async function rateLimitMiddleware(
-    req: NextRequest,
-    res: NextResponse
-  ) {
+    req: NextRequest
+  ): Promise<NextResponse | undefined> {
     const ip = req.ip || 'unknown';
     const now = Date.now();
     const requestData = ipRequests.get(ip);
@@ -21,7 +20,7 @@ export function rateLimit(config: RateLimitConfig) {
         count: 1,
         resetTime: now + config.windowMs,
       });
-      return NextResponse.next();
+      return;
     }
 
     if (requestData.count >= config.limit) {
@@ -32,6 +31,6 @@ export function rateLimit(config: RateLimitConfig) {
     }
 
     requestData.count++;
-    return NextResponse.next();
+    return;
   };
 }
