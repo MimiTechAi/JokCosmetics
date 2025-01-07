@@ -12,21 +12,21 @@ const localizer = momentLocalizer(moment);
 
 type Booking = {
   id: string;
-  customer: {
+  requested_date: string;
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+  notes: string;
+  customers: {
     first_name: string;
     last_name: string;
     email: string;
     phone: string;
     whatsapp: string;
-  };
-  service: {
+  }[];
+  services: {
     name: string;
     duration: number;
     price: number;
-  };
-  requested_date: string;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
-  notes: string;
+  }[];
 };
 
 export default function AdminDashboard() {
@@ -96,9 +96,9 @@ export default function AdminDashboard() {
 
   const calendarEvents = bookings.map(booking => ({
     id: booking.id,
-    title: `${booking.service.name} - ${booking.customer.first_name} ${booking.customer.last_name}`,
+    title: `${booking.services[0].name} - ${booking.customers[0].first_name} ${booking.customers[0].last_name}`,
     start: new Date(booking.requested_date),
-    end: new Date(new Date(booking.requested_date).getTime() + booking.service.duration * 60000),
+    end: new Date(new Date(booking.requested_date).getTime() + booking.services[0].duration * 60000),
     resource: booking
   }));
 
@@ -195,18 +195,18 @@ export default function AdminDashboard() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm font-medium text-gray-900">
-                        {booking.customer.first_name} {booking.customer.last_name}
+                        {booking.customers[0].first_name} {booking.customers[0].last_name}
                       </div>
                       <div className="text-sm text-gray-500">
-                        {booking.customer.email}
+                        {booking.customers[0].email}
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-900">
-                        {booking.service.name}
+                        {booking.services[0].name}
                       </div>
                       <div className="text-sm text-gray-500">
-                        {booking.service.duration} Min. | {booking.service.price}€
+                        {booking.services[0].duration} Min. | {booking.services[0].price}€
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -270,22 +270,22 @@ export default function AdminDashboard() {
               <div className="space-y-4">
                 <div>
                   <h3 className="font-medium">Kunde</h3>
-                  <p>{selectedBooking.customer.first_name} {selectedBooking.customer.last_name}</p>
-                  <p className="text-sm text-gray-500">{selectedBooking.customer.email}</p>
-                  {selectedBooking.customer.phone && (
-                    <p className="text-sm text-gray-500">Tel: {selectedBooking.customer.phone}</p>
+                  <p>{selectedBooking.customers[0].first_name} {selectedBooking.customers[0].last_name}</p>
+                  <p className="text-sm text-gray-500">{selectedBooking.customers[0].email}</p>
+                  {selectedBooking.customers[0].phone && (
+                    <p className="text-sm text-gray-500">Tel: {selectedBooking.customers[0].phone}</p>
                   )}
-                  {selectedBooking.customer.whatsapp && (
-                    <p className="text-sm text-gray-500">WhatsApp: {selectedBooking.customer.whatsapp}</p>
+                  {selectedBooking.customers[0].whatsapp && (
+                    <p className="text-sm text-gray-500">WhatsApp: {selectedBooking.customers[0].whatsapp}</p>
                   )}
                 </div>
 
                 <div>
                   <h3 className="font-medium">Service</h3>
-                  <p>{selectedBooking.service.name}</p>
+                  <p>{selectedBooking.services[0].name}</p>
                   <p className="text-sm text-gray-500">
-                    Dauer: {selectedBooking.service.duration} Min. | 
-                    Preis: {selectedBooking.service.price}€
+                    Dauer: {selectedBooking.services[0].duration} Min. | 
+                    Preis: {selectedBooking.services[0].price}€
                   </p>
                 </div>
 
