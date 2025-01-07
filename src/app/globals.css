@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary-color: #FF69B4;
+  --secondary-color: #FFC0CB;
+  --accent-color: #FFB6C1;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply antialiased text-gray-800 bg-white;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+}
+
+@layer components {
+  .hero-section {
+    @apply relative min-h-[90vh] flex items-center justify-center;
+  }
+  .container-custom {
+    @apply container mx-auto px-4 md:px-6;
+  }
+  .section-title {
+    @apply text-3xl md:text-4xl font-serif mb-4;
+  }
+  .btn-primary {
+    @apply inline-block bg-pink-500 hover:bg-pink-600 text-white font-semibold px-8 py-4 rounded-full transition-colors duration-300;
+  }
+  .btn-secondary {
+    @apply inline-block bg-white hover:bg-gray-50 text-pink-500 font-semibold px-6 py-2 rounded-full border-2 border-pink-500 transition-colors duration-300;
+  }
+  .section-padding {
+    @apply py-16 md:py-24;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.8s ease-out forwards;
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
