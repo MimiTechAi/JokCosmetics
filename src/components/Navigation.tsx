@@ -4,7 +4,11 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 
-export default function Navigation() {
+interface NavigationProps {
+  locale: string;
+}
+
+export default function Navigation({ locale }: NavigationProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -18,11 +22,12 @@ export default function Navigation() {
   }, []);
 
   const menuItems = [
-    { href: '/', label: 'Home' },
-    { href: '#services', label: 'Dienstleistungen' },
-    { href: '#about', label: 'Über uns' },
-    { href: '#gallery', label: 'Galerie' },
-    { href: '#contact', label: 'Kontakt' },
+    { href: `/${locale}`, label: 'Home' },
+    { href: `/${locale}#services`, label: 'Services' },
+    { href: `/${locale}#about`, label: 'About' },
+    { href: `/${locale}#gallery`, label: 'Gallery' },
+    { href: `/${locale}#contact`, label: 'Contact' },
+    { href: `/booking`, label: 'Book Now' },
   ];
 
   return (
@@ -61,16 +66,6 @@ export default function Navigation() {
                 {item.label}
               </Link>
             ))}
-            <Link
-              href="/booking"
-              className={`px-6 py-2 rounded-full transition-colors ${
-                isScrolled
-                  ? 'bg-primary text-white hover:bg-primary-dark'
-                  : 'bg-white text-primary hover:bg-gray-100'
-              }`}
-            >
-              Termin buchen
-            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -121,17 +116,6 @@ export default function Navigation() {
                     {item.label}
                   </Link>
                 ))}
-                <Link
-                  href="/booking"
-                  onClick={() => setIsOpen(false)}
-                  className={`px-6 py-2 rounded-full text-center transition-colors ${
-                    isScrolled
-                      ? 'bg-primary text-white hover:bg-primary-dark'
-                      : 'bg-white text-primary hover:bg-gray-100'
-                  }`}
-                >
-                  Termin buchen
-                </Link>
               </div>
             </motion.div>
           )}
