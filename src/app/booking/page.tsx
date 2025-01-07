@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/lib/supabase/client';
 
@@ -29,7 +29,7 @@ export default function BookingPage() {
   });
 
   // Lade Services beim ersten Render
-  useState(() => {
+  useEffect(() => {
     async function fetchServices() {
       const { data, error } = await supabase
         .from('services')
