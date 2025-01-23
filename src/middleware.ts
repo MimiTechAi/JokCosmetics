@@ -1,7 +1,6 @@
-import { createServerClient } from '@supabase/ssr';
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { cookies } from 'next/headers';
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next();
@@ -15,18 +14,24 @@ export async function middleware(req: NextRequest) {
         get(name: string) {
           return req.cookies.get(name)?.value;
         },
-        set(name: string, value: string, options: any) {
-          res.cookies.set({
+        set(name: string, value: string, options: CookieOptions) {
+          req.cookies.set({
             name,
             value,
             ...options,
+            sameSite: 'lax',
+            secure: process.env.NODE_ENV === 'production',
           });
+          res.headers.append('Set-Cookie', req.cookies.get(name)!.value);
         },
-        remove(name: string, options: any) {
-          res.cookies.delete({
+        remove(name: string, options: CookieOptions) {
+          req.cookies.delete({
             name,
             ...options,
+            sameSite: 'lax',
+            secure: process.env.NODE_ENV === 'production',
           });
+          res.headers.append('Set-Cookie', `${name}=; Max-Age=0; Path=/`);
         },
       },
     }
@@ -58,7 +63,17 @@ export async function middleware(req: NextRequest) {
       redirectUrl.searchParams.set('redirectTo', path);
       return NextResponse.redirect(redirectUrl);
     }
-    return res;
+    
+    // Optional: Überprüfe Admin-Rolle
+    const { data: { role } } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', session.user.id)
+      .single();
+
+    if (role !== 'admin') {
+      return NextResponse.redirect(new URL('/', req.url));
+    }
   }
 
   // Wenn es sich um die Login-Seite handelt
@@ -77,6 +92,8 @@ export const config = {
   matcher: [
     '/admin/:path*',
     '/api/:path*',
-    '/auth/login'
+    '/auth/login',
+    '/login',
+    '/register',
   ],
 };
