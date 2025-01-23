@@ -5,7 +5,7 @@ import './globals.css'
 import { Navbar } from '@/components/Navbar'
 import { Toaster } from '@/components/ui/toaster'
 import { Providers } from './providers'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -17,30 +17,35 @@ function RootLayoutContent({
 }) {
   const router = useRouter()
   const [secretCode, setSecretCode] = useState<string>('')
+  const [shouldNavigate, setShouldNavigate] = useState(false)
+
+  const handleKeyPress = useCallback((e: KeyboardEvent) => {
+    const key = e.key.toLowerCase()
+    setSecretCode(prev => {
+      const newCode = prev + key
+      console.log('Current code:', newCode)
+      
+      if (newCode.includes('jok')) {
+        console.log('Admin-Code erkannt!')
+        setShouldNavigate(true)
+        return ''
+      }
+      
+      return newCode.slice(-10)
+    })
+  }, [])
 
   useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      const key = e.key.toLowerCase()
-      
-      setSecretCode((prev) => {
-        const newCode = prev + key
-        console.log('Current code:', newCode) // Debug-Info
-        
-        // Prüfe, ob der Code "jok" enthält
-        if (newCode.includes('jok')) {
-          console.log('Admin-Code erkannt!') // Debug-Info
-          router.push('/admin')
-          return ''
-        }
-        
-        // Behalte nur die letzten 10 Zeichen
-        return newCode.slice(-10)
-      })
+    if (shouldNavigate) {
+      router.push('/admin')
+      setShouldNavigate(false)
     }
+  }, [shouldNavigate, router])
 
+  useEffect(() => {
     window.addEventListener('keypress', handleKeyPress)
     return () => window.removeEventListener('keypress', handleKeyPress)
-  }, [router])
+  }, [handleKeyPress])
 
   return (
     <div className="w-screen overflow-x-hidden">
