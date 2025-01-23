@@ -1,15 +1,51 @@
-import type { Metadata } from 'next'
+'use client'
+
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { Navbar } from '@/components/Navbar'
 import { Toaster } from '@/components/ui/toaster'
 import { Providers } from './providers'
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
 const inter = Inter({ subsets: ['latin'] })
 
-export const metadata: Metadata = {
-  title: 'JOK Cosmetics',
-  description: 'Professionelle Kosmetikbehandlungen in Bad Liebenzell',
+function RootLayoutContent({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  const router = useRouter()
+
+  useEffect(() => {
+    let pressedKeys: string[] = []
+    
+    const handleKeyDown = (e: KeyboardEvent) => {
+      pressedKeys.push(e.key.toLowerCase())
+      
+      // Prüfe auf die Tastenkombination "jok"
+      if (pressedKeys.join('').includes('jok')) {
+        router.push('/admin')
+        pressedKeys = []
+      }
+      
+      // Setze die Liste zurück, wenn sie zu lang wird
+      if (pressedKeys.length > 10) {
+        pressedKeys = []
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [router])
+
+  return (
+    <div className="w-screen overflow-x-hidden">
+      <Navbar />
+      {children}
+      <Toaster />
+    </div>
+  )
 }
 
 export default function RootLayout({
@@ -21,11 +57,7 @@ export default function RootLayout({
     <html lang="de">
       <body className={`${inter.className} overflow-x-hidden`}>
         <Providers>
-          <div className="w-screen overflow-x-hidden">
-            <Navbar />
-            {children}
-            <Toaster />
-          </div>
+          <RootLayoutContent>{children}</RootLayoutContent>
         </Providers>
       </body>
     </html>
