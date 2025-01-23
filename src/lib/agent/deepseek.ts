@@ -1,14 +1,13 @@
-import { Configuration, OpenAIApi } from 'openai';
+import OpenAI from 'openai';
 
 export class DeepseekAgent {
-  private client: OpenAIApi;
+  private client: OpenAI;
 
   constructor(apiKey: string) {
-    const configuration = new Configuration({
+    this.client = new OpenAI({
       apiKey,
-      basePath: 'https://api.deepseek.com/v1'
+      baseURL: 'https://api.deepseek.com/v1'
     });
-    this.client = new OpenAIApi(configuration);
   }
 
   async generateResponse(message: string): Promise<string> {
@@ -18,7 +17,7 @@ export class DeepseekAgent {
       Beantworte Fragen zu Terminen, Dienstleistungen und allgemeinen Informationen.
       Sprich immer Deutsch und sei höflich und professionell.`;
 
-      const response = await this.client.createChatCompletion({
+      const response = await this.client.chat.completions.create({
         model: 'deepseek-chat',
         messages: [
           { role: 'system', content: systemPrompt },
@@ -29,7 +28,7 @@ export class DeepseekAgent {
         stream: false
       });
       
-      return response.data.choices[0]?.message?.content || 'Entschuldigung, ich konnte keine Antwort generieren.';
+      return response.choices[0]?.message?.content || 'Entschuldigung, ich konnte keine Antwort generieren.';
     } catch (error) {
       console.error('Fehler bei der Deepseek-API:', error);
       throw error;
