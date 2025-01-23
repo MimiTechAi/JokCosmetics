@@ -4,6 +4,33 @@ import { Service } from '@/types/service';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 
+export interface EmailData {
+  to: string;
+  subject: string;
+  html: string;
+}
+
+export async function sendEmail(data: EmailData) {
+  try {
+    const response = await fetch('/api/notify/email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to send email');
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error sending email:', error);
+    return false;
+  }
+}
+
 export async function sendEmailNotification(
   booking: Booking,
   customer: Customer,
@@ -11,7 +38,7 @@ export async function sendEmailNotification(
 ) {
   const formattedDate = format(new Date(booking.booking_date), "dd. MMMM yyyy", { locale: de });
   
-  const emailData = {
+  const emailData: EmailData = {
     to: customer.email,
     subject: 'Buchungsbestätigung - Jok Cosmetics',
     html: `
@@ -47,7 +74,7 @@ export async function sendEmailNotification(
     `,
   };
 
-  const adminEmailData = {
+  const adminEmailData: EmailData = {
     to: process.env.ADMIN_EMAIL,
     subject: 'Neue Buchung eingegangen - Jok Cosmetics',
     html: `
@@ -76,20 +103,12 @@ export async function sendEmailNotification(
 
   try {
     // Sende E-Mail an Kunden
-    const customerResponse = await fetch('/api/notify/email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(emailData)
-    });
+    const customerResponse = await sendEmail(emailData);
 
     // Sende E-Mail an Admin
-    const adminResponse = await fetch('/api/notify/email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(adminEmailData)
-    });
+    const adminResponse = await sendEmail(adminEmailData);
 
-    return customerResponse.ok && adminResponse.ok;
+    return customerResponse && adminResponse;
   } catch (error) {
     console.error('Fehler beim Senden der E-Mail:', error);
     return false;
