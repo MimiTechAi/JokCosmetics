@@ -5,8 +5,8 @@ import './globals.css'
 import { Navbar } from '@/components/Navbar'
 import { Toaster } from '@/components/ui/toaster'
 import { Providers } from './providers'
-import { useEffect, useState, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -15,43 +15,37 @@ function RootLayoutContent({
 }: {
   children: React.ReactNode
 }) {
-  const router = useRouter()
-  const [secretCode, setSecretCode] = useState<string>('')
-  const [shouldNavigate, setShouldNavigate] = useState(false)
+  const [showAdmin, setShowAdmin] = useState(false)
 
-  const handleKeyPress = useCallback((e: KeyboardEvent) => {
-    const key = e.key.toLowerCase()
-    setSecretCode(prev => {
-      const newCode = prev + key
-      console.log('Current code:', newCode)
-      
-      if (newCode.includes('jok')) {
-        console.log('Admin-Code erkannt!')
-        setShouldNavigate(true)
-        return ''
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key.toLowerCase() === 'j') {
+        setShowAdmin(true)
+        setTimeout(() => setShowAdmin(false), 2000) // Verstecke nach 2 Sekunden
       }
-      
-      return newCode.slice(-10)
-    })
-  }, [])
-
-  useEffect(() => {
-    if (shouldNavigate) {
-      router.push('/admin')
-      setShouldNavigate(false)
     }
-  }, [shouldNavigate, router])
 
-  useEffect(() => {
     window.addEventListener('keypress', handleKeyPress)
     return () => window.removeEventListener('keypress', handleKeyPress)
-  }, [handleKeyPress])
+  }, [])
 
   return (
     <div className="w-screen overflow-x-hidden">
       <Navbar />
       {children}
       <Toaster />
+      {showAdmin && (
+        <Link 
+          href="/admin"
+          className="fixed bottom-4 right-4 bg-transparent"
+          onClick={(e) => {
+            e.preventDefault()
+            window.location.href = '/admin'
+          }}
+        >
+          <button className="w-4 h-4" />
+        </Link>
+      )}
     </div>
   )
 }

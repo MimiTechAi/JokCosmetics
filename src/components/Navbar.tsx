@@ -59,7 +59,7 @@ export function Navbar() {
                 width={240}
                 height={60}
                 className={cn(
-                  "h-10 w-full transition-all duration-300",
+                  "h-10 w-auto transition-all duration-300",
                   isScrolled ? "filter brightness-0" : "filter brightness-100"
                 )}
                 priority
@@ -114,6 +114,12 @@ export function Navbar() {
                 WhatsApp
               </Button>
             </Link>
+            {/* Versteckter Admin-Link */}
+            <div className="w-1 h-1 opacity-0 hover:opacity-100">
+              <Link href="/auth/login">
+                <span className="w-1 h-1" />
+              </Link>
+            </div>
           </div>
 
           {/* Mobile Menu Button */}
