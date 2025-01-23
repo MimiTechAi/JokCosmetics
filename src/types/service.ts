@@ -5,22 +5,14 @@ export interface Service {
   duration: string | number;
   price: string | number;
   category: string;
-  image: string;
-  image_url?: string;
-  is_active?: boolean;
-  benefits?: string[];
-  features?: {
-    icon: string;
-    text: string;
-  }[];
-  techniques?: string[];
+  image_url: string;
+  is_active: boolean;
 }
 
 export interface ServiceWithBookings extends Service {
   bookings: {
     id: string;
-    booking_date: string;
-    booking_time: string;
+    date: string;
     status: string;
   }[];
 }

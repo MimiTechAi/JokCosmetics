@@ -4,9 +4,10 @@ interface Service {
   id: string;
   name: string;
   description: string;
-  duration: number;
-  price: number;
+  duration: string | number;
+  price: string | number;
   category: string;
+  image_url: string;
   is_active: boolean;
 }
 
@@ -22,9 +23,10 @@ export default function EditServiceModal({ service, isOpen, onClose, onSave }: E
     id: '',
     name: '',
     description: '',
-    duration: 0,
-    price: 0,
+    duration: '',
+    price: '',
     category: '',
+    image_url: '',
     is_active: true
   });
 
@@ -75,11 +77,10 @@ export default function EditServiceModal({ service, isOpen, onClose, onSave }: E
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Dauer (Minuten)</label>
               <input
-                type="number"
+                type="text"
                 value={formData.duration}
-                onChange={(e) => setFormData({ ...formData, duration: parseInt(e.target.value) })}
+                onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
                 className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
-                min="0"
                 required
               />
             </div>
@@ -87,12 +88,10 @@ export default function EditServiceModal({ service, isOpen, onClose, onSave }: E
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Preis (€)</label>
               <input
-                type="number"
+                type="text"
                 value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
+                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                 className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
-                min="0"
-                step="0.01"
                 required
               />
             </div>

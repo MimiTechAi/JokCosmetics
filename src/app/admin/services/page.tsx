@@ -3,18 +3,7 @@
 import { useEffect, useState } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import EditServiceModal from '@/components/EditServiceModal';
-
-interface Service {
-  id: string;
-  name: string;
-  description: string;
-  duration: string | number;
-  price: string | number;
-  category: string;
-  image: string;
-  image_url?: string;
-  is_active?: boolean;
-}
+import { Service } from '@/types/service';
 
 export default function ServicesPage() {
   const [services, setServices] = useState<Service[]>([]);
