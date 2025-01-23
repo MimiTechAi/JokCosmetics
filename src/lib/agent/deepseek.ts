@@ -1,10 +1,10 @@
-import Deepseek from 'deepseek-api';
+import * as deepseek from 'deepseek-api';
 
 export class DeepseekAgent {
   private client: any;
 
   constructor(apiKey: string) {
-    this.client = new Deepseek(apiKey);
+    this.client = new deepseek.DeepseekAPI(apiKey);
   }
 
   async generateResponse(message: string): Promise<string> {

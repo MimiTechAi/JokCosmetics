@@ -2,10 +2,18 @@ export interface Service {
   id: string;
   name: string;
   description: string;
-  price: number;
-  duration: number;
-  created_at: string;
-  updated_at: string;
+  duration: string | number;
+  price: string | number;
+  category: string;
+  image: string;
+  image_url?: string;
+  is_active?: boolean;
+  benefits?: string[];
+  features?: {
+    icon: string;
+    text: string;
+  }[];
+  techniques?: string[];
 }
 
 export interface ServiceWithBookings extends Service {

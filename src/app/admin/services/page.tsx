@@ -8,11 +8,12 @@ interface Service {
   id: string;
   name: string;
   description: string;
-  duration: number;
-  price: number;
+  duration: string | number;
+  price: string | number;
   category: string;
-  image_url: string;
-  is_active: boolean;
+  image: string;
+  image_url?: string;
+  is_active?: boolean;
 }
 
 export default function ServicesPage() {
