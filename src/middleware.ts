@@ -56,33 +56,28 @@ export async function middleware(req: NextRequest) {
     return res;
   }
 
-  // Wenn es sich um den Admin-Bereich handelt
+  // Wenn es sich um eine Admin-Route handelt
   if (path.startsWith('/admin')) {
     if (!session) {
-      const redirectUrl = new URL('/auth/login', req.url);
-      redirectUrl.searchParams.set('redirectTo', path);
-      return NextResponse.redirect(redirectUrl);
+      return NextResponse.redirect(new URL('/login', req.url));
     }
     
-    // Optional: Überprüfe Admin-Rolle
-    const { data: { role } } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', session.user.id)
-      .single();
+    try {
+      // Überprüfe Admin-Rolle
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', session.user.id)
+        .single();
 
-    if (role !== 'admin') {
+      if (!profile || profile.role !== 'admin') {
+        console.log('Kein Admin-Zugriff:', profile);
+        return NextResponse.redirect(new URL('/', req.url));
+      }
+    } catch (error) {
+      console.error('Fehler bei der Rollen-Überprüfung:', error);
       return NextResponse.redirect(new URL('/', req.url));
     }
-  }
-
-  // Wenn es sich um die Login-Seite handelt
-  if (path === '/auth/login') {
-    if (session) {
-      // Wenn bereits eingeloggt, zum Admin-Bereich weiterleiten
-      return NextResponse.redirect(new URL('/admin', req.url));
-    }
-    return res;
   }
 
   return res;
@@ -92,7 +87,6 @@ export const config = {
   matcher: [
     '/admin/:path*',
     '/api/:path*',
-    '/auth/login',
     '/login',
     '/register',
   ],
