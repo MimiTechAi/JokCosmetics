@@ -1,10 +1,10 @@
-import { DeepSeek } from 'deepseek-api';
+import Deepseek from 'deepseek-api';
 
 export class DeepseekAgent {
-  private client: DeepSeek;
+  private client: any;
 
   constructor(apiKey: string) {
-    this.client = new DeepSeek(apiKey);
+    this.client = new Deepseek(apiKey);
   }
 
   async generateResponse(message: string): Promise<string> {
@@ -14,7 +14,7 @@ export class DeepseekAgent {
       Beantworte Fragen zu Terminen, Dienstleistungen und allgemeinen Informationen.
       Sprich immer Deutsch und sei höflich und professionell.`;
 
-      const response = await this.client.chat.completions.create({
+      const response = await this.client.sendMessage({
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: message }
@@ -24,7 +24,7 @@ export class DeepseekAgent {
         max_tokens: 1024
       });
       
-      return response.choices[0]?.message?.content || 'Entschuldigung, ich konnte keine Antwort generieren.';
+      return response?.content || 'Entschuldigung, ich konnte keine Antwort generieren.';
     } catch (error) {
       console.error('Fehler bei der Deepseek-API:', error);
       throw error;
