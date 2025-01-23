@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { sendMail } from '@/lib/email';
+import { sendEmail } from '@/lib/notifications/email';
 
 export async function POST(req: Request) {
   try {
@@ -40,7 +40,7 @@ export async function POST(req: Request) {
       </p>
     `;
 
-    await sendMail({
+    await sendEmail({
       to: process.env.ADMIN_EMAIL || 'admin@jok-cosmetics.de',
       subject,
       html

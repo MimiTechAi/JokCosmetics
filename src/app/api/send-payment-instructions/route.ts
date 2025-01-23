@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { sendMail } from '@/lib/email';
+import { sendEmail } from '@/lib/notifications/email';
 
 export async function POST(req: Request) {
   try {
@@ -22,7 +22,7 @@ ${instructions}
       </p>
     `;
 
-    await sendMail({
+    await sendEmail({
       to: email,
       subject,
       html
