@@ -62,7 +62,7 @@ const services: Service[] = [
     description: 'Professionelle Lippenkonturierung und sanfte Farbpigmentierung für verführerisch volle Lippen mit natürlichem Farbverlauf.',
     duration: '120-180 Min',
     price: '399€',
-    image: '/images/services/lips-art.jpg',
+    image: '/images/WhatsApp Image 2024-10-12 at 20.31.43.jpeg',
     benefits: [
       'Natürlicher Farbverlauf',
       'Definierte Lippenkontur',
