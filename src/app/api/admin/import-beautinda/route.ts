@@ -41,6 +41,11 @@ export async function GET() {
         .eq('email', booking.customerEmail)
         .single();
 
+      if (!customerData) {
+        console.error('Kunde nicht gefunden:', booking.customerEmail);
+        continue;
+      }
+
       // 3. Transformiere und importiere Service (falls noch nicht vorhanden)
       const { data: serviceData, error: serviceError } = await supabase
         .from('services')
