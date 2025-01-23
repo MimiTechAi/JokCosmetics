@@ -1,94 +1,33 @@
-import { Metadata } from 'next';
-import { Montserrat, Playfair_Display } from 'next/font/google';
-import './globals.css';
+import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
+import './globals.css'
+import { Navbar } from '@/components/Navbar'
+import { Toaster } from '@/components/ui/toaster'
+import { Providers } from './providers'
 
-const montserrat = Montserrat({ 
-  subsets: ['latin'],
-  variable: '--font-montserrat',
-  display: 'swap',
-});
-
-const playfair = Playfair_Display({ 
-  subsets: ['latin'],
-  variable: '--font-playfair',
-  display: 'swap',
-});
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://jok-cosmetics.de'),
-  title: {
-    default: 'Jok Cosmetics | Beauty Salon in Bad Liebenzell',
-    template: '%s | Jok Cosmetics'
-  },
-  description: 'Professionelle Permanent Make-up, Microblading und Wimpernverlängerung in Bad Liebenzell. Natürliche Ergebnisse von zertifizierten Experten.',
-  keywords: [
-    'Permanent Make-up Bad Liebenzell',
-    'Microblading Bad Liebenzell',
-    'Powder Brows',
-    'Wimpernverlängerung',
-    'Beauty Salon Bad Liebenzell',
-    'Augenbrauen Bad Liebenzell',
-    'Kosmetikstudio Bad Liebenzell'
-  ],
-  authors: [{ name: 'Jok Cosmetics' }],
-  creator: 'Jok Cosmetics',
-  publisher: 'Jok Cosmetics',
-  formatDetection: {
-    email: false,
-    address: false,
-    telephone: false,
-  },
-  openGraph: {
-    title: 'Jok Cosmetics | Beauty Salon in Bad Liebenzell',
-    description: 'Professionelle Permanent Make-up, Microblading und Wimpernverlängerung in Bad Liebenzell. Natürliche Ergebnisse von zertifizierten Experten.',
-    url: 'https://jok-cosmetics.de',
-    siteName: 'Jok Cosmetics',
-    images: [
-      {
-        url: '/images/og-image.jpg',
-        width: 1200,
-        height: 630,
-        alt: 'Jok Cosmetics Beauty Salon',
-      },
-    ],
-    locale: 'de_DE',
-    type: 'website',
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
-  },
-  icons: {
-    icon: '/favicon.ico',
-    shortcut: '/favicon-16x16.png',
-    apple: '/apple-touch-icon.png',
-  },
-  manifest: '/site.webmanifest',
-  verification: {
-    google: 'google-site-verification-code',
-  },
-  alternates: {
-    canonical: 'https://jok-cosmetics.de',
-  },
-};
+  title: 'JOK Cosmetics',
+  description: 'Professionelle Kosmetikbehandlungen in Bad Liebenzell',
+}
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
   return (
-    <html lang="de" className={`${montserrat.variable} ${playfair.variable}`}>
-      <body>
-        {children}
+    <html lang="de">
+      <body className={`${inter.className} overflow-x-hidden`}>
+        <Providers>
+          <div className="w-screen overflow-x-hidden">
+            <Navbar />
+            {children}
+            <Toaster />
+          </div>
+        </Providers>
       </body>
     </html>
-  );
+  )
 }

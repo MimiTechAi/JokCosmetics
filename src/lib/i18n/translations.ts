@@ -1,0 +1,72 @@
+import { Translation } from './types';
+
+export const translations: Translation = {
+  de: {
+    'welcome': 'Willkommen! Wie kann ich Ihnen helfen?',
+    'input.placeholder': 'Schreiben Sie eine Nachricht...',
+    'button.send': 'Senden',
+    'button.minimize': 'Minimieren',
+    'button.maximize': 'Maximieren',
+    'button.close': 'Schließen',
+    'loading': 'Lädt...',
+    'error.general': 'Es tut uns leid, ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.',
+    'assistant.name': 'KI-Assistent',
+    'assistant.greeting': 'Hallo! Ich bin Ihr persönlicher Beauty-Assistent. Wie kann ich Ihnen heute helfen?',
+    'privacy.notice': 'Ihre Daten werden vertraulich behandelt',
+    'privacy.settings': 'Datenschutz-Einstellungen',
+    'theme.light': 'Hell',
+    'theme.dark': 'Dunkel',
+    'theme.system': 'System'
+  },
+  en: {
+    'welcome': 'Welcome! How can I help you?',
+    'input.placeholder': 'Type a message...',
+    'button.send': 'Send',
+    'button.minimize': 'Minimize',
+    'button.maximize': 'Maximize',
+    'button.close': 'Close',
+    'loading': 'Loading...',
+    'error.general': 'We\'re sorry, an error occurred. Please try again.',
+    'assistant.name': 'AI Assistant',
+    'assistant.greeting': 'Hello! I\'m your personal beauty assistant. How can I help you today?',
+    'privacy.notice': 'Your data is treated confidentially',
+    'privacy.settings': 'Privacy Settings',
+    'theme.light': 'Light',
+    'theme.dark': 'Dark',
+    'theme.system': 'System'
+  },
+  tr: {
+    'welcome': 'Hoş geldiniz! Size nasıl yardımcı olabilirim?',
+    'input.placeholder': 'Bir mesaj yazın...',
+    'button.send': 'Gönder',
+    'button.minimize': 'Küçült',
+    'button.maximize': 'Büyüt',
+    'button.close': 'Kapat',
+    'loading': 'Yükleniyor...',
+    'error.general': 'Üzgünüz, bir hata oluştu. Lütfen tekrar deneyin.',
+    'assistant.name': 'AI Asistan',
+    'assistant.greeting': 'Merhaba! Ben sizin kişisel güzellik asistanınızım. Bugün size nasıl yardımcı olabilirim?',
+    'privacy.notice': 'Verileriniz gizli tutulur',
+    'privacy.settings': 'Gizlilik Ayarları',
+    'theme.light': 'Açık',
+    'theme.dark': 'Koyu',
+    'theme.system': 'Sistem'
+  },
+  ru: {
+    'welcome': 'Добро пожаловать! Чем могу помочь?',
+    'input.placeholder': 'Введите сообщение...',
+    'button.send': 'Отправить',
+    'button.minimize': 'Свернуть',
+    'button.maximize': 'Развернуть',
+    'button.close': 'Закрыть',
+    'loading': 'Загрузка...',
+    'error.general': 'Извините, произошла ошибка. Пожалуйста, попробуйте еще раз.',
+    'assistant.name': 'ИИ-ассистент',
+    'assistant.greeting': 'Здравствуйте! Я ваш персональный ассистент по красоте. Как я могу помочь вам сегодня?',
+    'privacy.notice': 'Ваши данные обрабатываются конфиденциально',
+    'privacy.settings': 'Настройки конфиденциальности',
+    'theme.light': 'Светлая',
+    'theme.dark': 'Темная',
+    'theme.system': 'Системная'
+  }
+};

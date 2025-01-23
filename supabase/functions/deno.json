@@ -1,0 +1,18 @@
+{
+  "imports": {
+    "std/": "https://deno.land/std@0.168.0/",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2",
+    "smtp": "https://deno.land/x/smtp@v0.7.0/mod.ts",
+    "eta": "https://deno.land/x/eta@v2.0.0/mod.ts",
+    "eta/config": "https://deno.land/x/eta@v2.0.0/config.ts"
+  },
+  "compilerOptions": {
+    "allowJs": true,
+    "lib": ["deno.window"],
+    "strict": true
+  },
+  "tasks": {
+    "start": "deno run --allow-net --allow-env --allow-read index.ts",
+    "dev": "deno run --watch --allow-net --allow-env --allow-read index.ts"
+  }
+}

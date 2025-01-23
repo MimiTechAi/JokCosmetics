@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminabsage - JOK Cosmetics</title>
+</head>
+<body style="font-family: 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333333; margin: 0; padding: 0; background-color: #f4f4f4; -webkit-font-smoothing: antialiased;">
+    <div style="max-width: 600px; margin: 20px auto; padding: 0; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.1);">
+        <!-- Header -->
+        <div style="text-align: center; padding: 40px 0; background-color: #4A154B; background-image: linear-gradient(135deg, #4A154B, #D4AF37);">
+            <img src="https://jok-cosmetics.de/images/logo/jok-logo.png" alt="JOK Cosmetics Logo" style="max-width: 180px; height: auto; margin-bottom: 20px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">
+            <h1 style="color: white; margin: 0; font-size: 32px; letter-spacing: -0.5px;">Termin wurde abgesagt</h1>
+        </div>
+        
+        <!-- Content -->
+        <div style="padding: 40px 30px;">
+            <!-- Booking Details -->
+            <div style="background-color: #f9f5ff; padding: 30px; border-radius: 12px; margin: 25px 0; border-left: 4px solid #4A154B; box-shadow: 0 2px 12px rgba(74, 21, 75, 0.1);">
+                <h2 style="color: #4A154B; margin-top: 0; font-size: 24px; letter-spacing: -0.5px;">Abgesagter Termin</h2>
+                <p><strong>Service:</strong> {{service_name}}</p>
+                <p><strong>Datum:</strong> {{booking_date}}</p>
+                <p><strong>Uhrzeit:</strong> {{booking_time}}</p>
+            </div>
+
+            <!-- Customer Info -->
+            <div style="background-color: #f8f9fa; padding: 25px; border-radius: 12px; margin: 25px 0; border: 1px solid rgba(74, 21, 75, 0.1);">
+                <h3 style="color: #4A154B; margin-top: 0; font-size: 20px; letter-spacing: -0.5px;">Kundendetails</h3>
+                <p><strong>Name:</strong> {{customer_name}}</p>
+                <p><strong>E-Mail:</strong> {{customer_email}}</p>
+                <p><strong>Telefon:</strong> {{customer_phone}}</p>
+            </div>
+
+            <!-- Button -->
+            <div style="text-align: center;">
+                <a href="https://jok-cosmetics.de/admin/bookings" style="display: inline-block; padding: 16px 36px; background-color: #4A154B; background-image: linear-gradient(135deg, #4A154B, #D4AF37); color: white; text-decoration: none; border-radius: 30px; margin: 25px 0; font-weight: bold; text-align: center; box-shadow: 0 4px 12px rgba(74, 21, 75, 0.2);">
+                    Buchungen verwalten
+                </a>
+            </div>
+
+            <!-- Divider -->
+            <div style="height: 2px; background: linear-gradient(to right, transparent, #D4AF37, transparent); margin: 35px 0; opacity: 0.5;"></div>
+
+            <!-- Info -->
+            <div style="text-align: center;">
+                <p style="margin: 0;">
+                    Der Kunde wurde automatisch über die Absage informiert.<br>
+                    Der Termin wurde aus dem Kalender entfernt.
+                </p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="text-align: center; padding: 30px; background-color: #f9f5ff; color: #333333;">
+            <p style="margin: 0;"><small>Diese E-Mail wurde automatisch generiert. Bitte antworten Sie nicht auf diese E-Mail.</small></p>
+        </div>
+    </div>
+</body>
+</html>

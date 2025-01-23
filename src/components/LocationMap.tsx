@@ -61,15 +61,16 @@ export default function LocationMap() {
             </div>
           </div>
           
-          <div className="h-[400px] lg:h-full min-h-[400px] relative rounded-lg overflow-hidden">
+          <div className="h-[400px] lg:h-full min-h-[400px] relative rounded-lg overflow-hidden shadow-lg">
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2635.9752!2d8.7321!3d48.7651!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDjCsDQ1JzU0LjQiTiA4wrA0MycxNS42IkU!5e0!3m2!1sde!2sde!4v1641234567890!5m2!1sde!2sde"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2635.975247692164!2d8.729911715674392!3d48.76514997927728!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47977af499f849f9%3A0x435b6a8353a8c70f!2sKirchstra%C3%9Fe%201%2C%2075378%20Bad%20Liebenzell!5e0!3m2!1sde!2sde!4v1641234567890!5m2!1sde!2sde"
               width="100%"
               height="100%"
               style={{ border: 0 }}
               allowFullScreen
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
+              className="rounded-lg"
             />
           </div>
         </div>
