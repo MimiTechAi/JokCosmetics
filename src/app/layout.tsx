@@ -5,7 +5,7 @@ import './globals.css'
 import { Navbar } from '@/components/Navbar'
 import { Toaster } from '@/components/ui/toaster'
 import { Providers } from './providers'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -16,27 +16,30 @@ function RootLayoutContent({
   children: React.ReactNode
 }) {
   const router = useRouter()
+  const [secretCode, setSecretCode] = useState<string>('')
 
   useEffect(() => {
-    let pressedKeys: string[] = []
-    
-    const handleKeyDown = (e: KeyboardEvent) => {
-      pressedKeys.push(e.key.toLowerCase())
+    const handleKeyPress = (e: KeyboardEvent) => {
+      const key = e.key.toLowerCase()
       
-      // Prüfe auf die Tastenkombination "jok"
-      if (pressedKeys.join('').includes('jok')) {
-        router.push('/admin')
-        pressedKeys = []
-      }
-      
-      // Setze die Liste zurück, wenn sie zu lang wird
-      if (pressedKeys.length > 10) {
-        pressedKeys = []
-      }
+      setSecretCode((prev) => {
+        const newCode = prev + key
+        console.log('Current code:', newCode) // Debug-Info
+        
+        // Prüfe, ob der Code "jok" enthält
+        if (newCode.includes('jok')) {
+          console.log('Admin-Code erkannt!') // Debug-Info
+          router.push('/admin')
+          return ''
+        }
+        
+        // Behalte nur die letzten 10 Zeichen
+        return newCode.slice(-10)
+      })
     }
 
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
+    window.addEventListener('keypress', handleKeyPress)
+    return () => window.removeEventListener('keypress', handleKeyPress)
   }, [router])
 
   return (
