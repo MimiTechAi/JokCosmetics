@@ -72,11 +72,12 @@ export default function ServicesPage() {
     }
   };
 
-  const formatPrice = (price: number) => {
+  const formatPrice = (price: string | number) => {
+    const numericPrice = typeof price === 'string' ? parseFloat(price) : price;
     return new Intl.NumberFormat('de-DE', {
       style: 'currency',
       currency: 'EUR'
-    }).format(price);
+    }).format(numericPrice);
   };
 
   if (loading) {
