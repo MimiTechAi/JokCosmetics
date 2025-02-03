@@ -18,16 +18,19 @@ interface FormData {
 }
 
 interface BookingFormProps {
-  initialServices: Service[];
+  services: Service[];
+  initialServiceId?: string;
+}
+
+interface BookingDetails {
+  serviceName: string;
+  date: string;
+  time: string;
 }
 
 const SuccessMessage = ({ onClose, bookingDetails }: { 
   onClose: () => void,
-  bookingDetails: {
-    serviceName: string;
-    date: string;
-    time: string;
-  }
+  bookingDetails: BookingDetails;
 }) => (
   <motion.div 
     initial={{ opacity: 0 }}
@@ -56,7 +59,7 @@ const SuccessMessage = ({ onClose, bookingDetails }: {
         <div className="mt-6">
           <button
             onClick={onClose}
-            className="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-pink-600 border border-transparent rounded-md hover:bg-pink-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-pink-500"
+            className="px-4 py-2 bg-pink-600 text-white rounded hover:bg-pink-700 transition-colors"
           >
             Schließen
           </button>
@@ -66,9 +69,11 @@ const SuccessMessage = ({ onClose, bookingDetails }: {
   </motion.div>
 );
 
-export function BookingForm({ initialServices }: BookingFormProps) {
-  const [step, setStep] = useState(1);
-  const [selectedService, setSelectedService] = useState<string>('');
+export const BookingForm = ({ services, initialServiceId }: BookingFormProps) => {
+  console.log('BookingForm rendered with:', { services, initialServiceId });
+
+  const [step, setStep] = useState(initialServiceId ? 2 : 1);
+  const [selectedService, setSelectedService] = useState<string>(initialServiceId || '');
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [selectedTime, setSelectedTime] = useState<string>('');
   const [formData, setFormData] = useState<FormData>({
@@ -78,16 +83,15 @@ export function BookingForm({ initialServices }: BookingFormProps) {
     phone: '',
     notes: '',
   });
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [bookingDetails, setBookingDetails] = useState<{
-    serviceName: string;
-    date: string;
-    time: string;
-  } | null>(null);
+  const [bookingDetails, setBookingDetails] = useState<BookingDetails | null>(null);
+
+  console.log('BookingForm rendered with services:', services?.length);
 
   const handleServiceSelect = (serviceId: string) => {
+    console.log('Selected service:', serviceId);
     setSelectedService(serviceId);
     setStep(2);
   };
@@ -104,250 +108,200 @@ export function BookingForm({ initialServices }: BookingFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    setLoading(true);
     setError(null);
 
     try {
-      const { data: service, error: serviceError } = await supabase
-        .from('services')
-        .select('*')
-        .eq('id', selectedService)
-        .single();
-
-      if (serviceError) {
-        console.error('Service error:', serviceError);
-        throw new Error('Service konnte nicht gefunden werden');
+      const selectedServiceData = services.find(s => s.id === selectedService);
+      console.log('Selected service:', selectedServiceData);
+      
+      if (!selectedServiceData) {
+        throw new Error('Selected service not found');
       }
 
-      const [hours, minutes] = selectedTime.split(':');
-      const startTime = new Date(selectedDate);
-      startTime.setHours(parseInt(hours), parseInt(minutes));
+      const booking = {
+        service_id: selectedService,
+        booking_date: selectedDate,
+        booking_time: selectedTime,
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        notes: formData.notes || ''
+      };
 
-      const endTime = new Date(startTime);
-      endTime.setMinutes(endTime.getMinutes() + (service?.duration || 60));
+      console.log('Attempting to create booking:', booking);
 
-      const { error: bookingError } = await supabase
+      const { data, error: bookingError } = await supabase
         .from('bookings')
-        .insert({
-          service_id: selectedService,
-          customer_email: formData.email,
-          customer_first_name: formData.firstName,
-          customer_last_name: formData.lastName,
-          customer_phone: formData.phone || null,
-          start_time: startTime.toISOString(),
-          end_time: endTime.toISOString(),
-          notes: formData.notes,
-          status: 'pending'
-        });
+        .insert([booking])
+        .select('*');
+
+      console.log('Booking response:', { data, error: bookingError });
 
       if (bookingError) {
-        console.error('Booking error:', bookingError);
-        throw new Error('Fehler bei der Buchung');
+        console.error('Detailed booking error:', JSON.stringify(bookingError, null, 2));
+        throw bookingError;
       }
 
-      const formattedDate = format(startTime, 'dd. MMMM yyyy', { locale: de });
-      const formattedTime = format(startTime, 'HH:mm', { locale: de });
-
-      const notificationResponse = await fetch('/api/notifications', {
+      // Send confirmation emails
+      const emailResponse = await fetch('/api/send-booking-confirmation', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          customerEmail: formData.email,
-          customerName: `${formData.firstName} ${formData.lastName}`,
-          serviceName: service.name,
-          serviceDate: formattedDate,
-          serviceTime: formattedTime,
-          customerPhone: formData.phone,
-          notes: formData.notes
+          booking,
+          service: selectedServiceData
         }),
       });
 
-      if (!notificationResponse.ok) {
-        console.error('Notification error:', await notificationResponse.text());
+      if (!emailResponse.ok) {
+        console.error('Failed to send confirmation emails');
       }
-
-      setBookingDetails({
-        serviceName: service.name,
-        date: formattedDate,
-        time: formattedTime
-      });
 
       setSuccess(true);
-      
-      setFormData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        notes: '',
+      setBookingDetails({
+        serviceName: selectedServiceData.title,
+        date: format(parseISO(selectedDate), 'd. MMMM yyyy', { locale: de }),
+        time: selectedTime
       });
-      setSelectedService('');
-      setSelectedDate('');
-      setSelectedTime('');
-      setStep(1);
-    } catch (error) {
-      console.error('Error submitting booking:', error);
-      setError(error instanceof Error ? error.message : 'Ein unerwarteter Fehler ist aufgetreten');
+    } catch (err) {
+      console.error('Full error object:', JSON.stringify(err, null, 2));
+      setError('Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.');
+      throw err;
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
-  };
-
-  const getAvailableDates = () => {
-    const dates = [];
-    const startDate = new Date();
-    for (let i = 1; i <= 14; i++) {
-      const date = addDays(startDate, i);
-      if (date.getDay() !== 0) {
-        dates.push(format(date, 'yyyy-MM-dd'));
-      }
-    }
-    return dates;
-  };
-
-  const getAvailableTimes = () => {
-    return [
-      '10:00', '11:00', '12:00', '13:00', '14:00', 
-      '15:00', '16:00', '17:00', '18:00'
-    ];
   };
 
   return (
-    <>
-      <div className="mb-8">
-        <div className="flex justify-between items-center">
-          {[1, 2, 3, 4].map((stepNumber) => (
-            <div
-              key={stepNumber}
-              className={`flex items-center ${
-                stepNumber < 4 ? 'flex-1' : ''
-              }`}
-            >
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  step >= stepNumber
-                    ? 'bg-pink-600 text-white'
-                    : 'bg-gray-200 text-gray-600'
-                }`}
-              >
-                {stepNumber}
-              </div>
-              {stepNumber < 4 && (
-                <div
-                  className={`flex-1 h-1 mx-2 ${
-                    step > stepNumber
-                      ? 'bg-pink-600'
-                      : 'bg-gray-200'
-                  }`}
-                />
-              )}
-            </div>
-          ))}
-        </div>
-        <div className="flex justify-between mt-2">
-          <span className="text-sm">Service</span>
-          <span className="text-sm">Datum</span>
-          <span className="text-sm">Uhrzeit</span>
-          <span className="text-sm">Details</span>
-        </div>
-      </div>
-
-      {error && (
-        <div className="mb-4 p-4 bg-red-100 text-red-700 rounded-lg">
-          {error}
-        </div>
-      )}
-
+    <div className="max-w-4xl mx-auto space-y-8">
       <AnimatePresence mode="wait">
         {step === 1 && (
           <motion.div
             key="step1"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="space-y-6"
           >
-            {initialServices.map((service) => (
-              <motion.div
-                key={service.id}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="bg-white p-6 rounded-lg shadow-lg cursor-pointer hover:shadow-xl transition-shadow"
-                onClick={() => handleServiceSelect(service.id)}
-              >
-                <h3 className="text-lg font-semibold mb-2">{service.name}</h3>
-                <p className="text-gray-600 mb-4">{service.description}</p>
-                <div className="flex justify-between items-center">
-                  <span className="text-pink-600 font-medium">
-                    {service.price}€
-                  </span>
-                  <span className="text-gray-500">
-                    {service.duration} Min.
-                  </span>
+            <h2 className="text-2xl font-semibold text-gray-900">
+              Wählen Sie Ihre Behandlung
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {services && services.length > 0 ? (
+                services.map((service) => (
+                  <motion.div
+                    key={service.id}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className={`p-4 rounded-lg border cursor-pointer transition-all ${
+                      selectedService === service.id
+                        ? 'border-pink-600 bg-pink-50 shadow-lg'
+                        : 'border-gray-200 hover:border-pink-300 hover:shadow'
+                    }`}
+                    onClick={() => handleServiceSelect(service.id)}
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <h3 className="font-medium text-gray-900">{service.title}</h3>
+                        <p className="text-sm text-gray-500 mt-1">{service.description}</p>
+                        <div className="flex items-center gap-4 mt-2">
+                          <span className="text-sm text-gray-600 flex items-center">
+                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            {service.duration}
+                          </span>
+                        </div>
+                      </div>
+                      <span className="font-medium text-pink-600 whitespace-nowrap ml-4">{service.price}</span>
+                    </div>
+                  </motion.div>
+                ))
+              ) : (
+                <div className="col-span-2 text-center py-8">
+                  <p className="text-gray-500">Keine Dienstleistungen verfügbar.</p>
                 </div>
-              </motion.div>
-            ))}
+              )}
+            </div>
           </motion.div>
         )}
 
         {step === 2 && (
           <motion.div
             key="step2"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="space-y-6"
           >
-            {getAvailableDates().map((date) => (
-              <motion.button
-                key={date}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => handleDateSelect(date)}
-                className="p-4 bg-white rounded-lg shadow hover:shadow-lg transition-shadow text-center"
-              >
-                <div className="font-medium">
-                  {format(parseISO(date), 'EEEE', { locale: de })}
-                </div>
-                <div className="text-sm text-gray-600">
-                  {format(parseISO(date), 'd. MMMM', { locale: de })}
-                </div>
-              </motion.button>
-            ))}
+            <h2 className="text-2xl font-semibold text-gray-900">
+              Wählen Sie ein Datum
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[...Array(14)].map((_, i) => {
+                const date = addDays(new Date(), i + 1);
+                return (
+                  <motion.button
+                    key={i}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleDateSelect(date.toISOString().split('T')[0])}
+                    className="p-4 bg-white rounded-lg shadow hover:shadow-lg transition-shadow text-center"
+                  >
+                    <div className="font-medium">
+                      {format(date, 'EEEE', { locale: de })}
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      {format(date, 'd. MMMM', { locale: de })}
+                    </div>
+                  </motion.button>
+                );
+              })}
+            </div>
           </motion.div>
         )}
 
         {step === 3 && (
           <motion.div
             key="step3"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="space-y-6"
           >
-            {getAvailableTimes().map((time) => (
-              <motion.button
-                key={time}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => handleTimeSelect(time)}
-                className="p-4 bg-white rounded-lg shadow hover:shadow-lg transition-shadow"
-              >
-                {time}
-              </motion.button>
-            ))}
+            <h2 className="text-2xl font-semibold text-gray-900">
+              Wählen Sie eine Uhrzeit
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'].map((time) => (
+                <motion.button
+                  key={time}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleTimeSelect(time)}
+                  className="p-4 bg-white rounded-lg shadow hover:shadow-lg transition-shadow text-center"
+                >
+                  {time}
+                </motion.button>
+              ))}
+            </div>
           </motion.div>
         )}
 
         {step === 4 && (
           <motion.div
             key="step4"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="space-y-6"
           >
+            <h2 className="text-2xl font-semibold text-gray-900">
+              Ihre Kontaktdaten
+            </h2>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -424,18 +378,20 @@ export function BookingForm({ initialServices }: BookingFormProps) {
                 />
               </div>
 
+              {error && (
+                <div className="text-red-600 text-sm">{error}</div>
+              )}
+
               <div className="flex justify-end">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={loading}
                   className={`px-6 py-3 bg-pink-600 text-white rounded-lg shadow hover:bg-pink-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-pink-500 ${
-                    isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+                    loading ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                 >
-                  {isSubmitting ? 'Wird gesendet...' : 'Termin buchen'}
-                </motion.button>
+                  {loading ? 'Wird gesendet...' : 'Termin buchen'}
+                </button>
               </div>
             </form>
           </motion.div>
@@ -443,31 +399,38 @@ export function BookingForm({ initialServices }: BookingFormProps) {
       </AnimatePresence>
 
       {step > 1 && (
-        <motion.div
+        <motion.button
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="mt-8 flex justify-start"
+          className="mt-6 text-pink-600 hover:text-pink-700"
+          onClick={() => setStep(step - 1)}
         >
-          <button
-            onClick={() => setStep(step - 1)}
-            className="px-4 py-2 text-pink-600 hover:text-pink-700 focus:outline-none"
-          >
-            ← Zurück
-          </button>
-        </motion.div>
+          ← Zurück
+        </motion.button>
       )}
 
       <AnimatePresence>
         {success && bookingDetails && (
-          <SuccessMessage 
+          <SuccessMessage
             onClose={() => {
               setSuccess(false);
               setBookingDetails(null);
-            }} 
+              setStep(1);
+              setSelectedService('');
+              setSelectedDate('');
+              setSelectedTime('');
+              setFormData({
+                firstName: '',
+                lastName: '',
+                email: '',
+                phone: '',
+                notes: '',
+              });
+            }}
             bookingDetails={bookingDetails}
           />
         )}
       </AnimatePresence>
-    </>
+    </div>
   );
-}
+};

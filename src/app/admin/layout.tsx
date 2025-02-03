@@ -4,13 +4,15 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { 
-  LayoutDashboard, 
-  Calendar, 
-  Users, 
-  Scissors, 
+import {
+  LayoutDashboard,
+  Calendar,
+  Users,
+  Settings,
   Menu,
-  X
+  X,
+  Scissors,
+  Clock
 } from 'lucide-react';
 
 const menuItems = [
@@ -25,14 +27,24 @@ const menuItems = [
     icon: Calendar
   },
   {
+    name: 'Buchungen',
+    href: '/admin/bookings',
+    icon: Clock
+  },
+  {
     name: 'Kunden',
     href: '/admin/customers',
     icon: Users
   },
   {
-    name: 'Services',
+    name: 'Dienstleistungen',
     href: '/admin/services',
     icon: Scissors
+  },
+  {
+    name: 'Einstellungen',
+    href: '/admin/settings',
+    icon: Settings
   }
 ];
 
@@ -106,7 +118,7 @@ export default function AdminLayout({
 
           <div className="p-6 border-t">
             <p className="text-sm text-gray-500">
-              © {new Date().getFullYear()} JOK Cosmetics
+              {new Date().getFullYear()} JOK Cosmetics
             </p>
           </div>
         </div>

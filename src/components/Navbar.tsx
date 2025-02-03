@@ -5,11 +5,19 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { supabase } from '@/lib/supabase/client';
+import { useRouter } from 'next/navigation';
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [scrollProgress, setScrollProgress] = useState(0)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/auth/login');
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -100,26 +108,61 @@ export function Navbar() {
                 variant="secondary" 
                 size="lg" 
                 className={cn(
-                  "whatsapp-btn",
-                  !isScrolled && "bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white border border-white/30"
+                  "transition-all",
+                  !isScrolled && "bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white"
                 )}
               >
-                <Image
-                  src="/images/whatsapp.svg"
-                  alt="WhatsApp"
-                  width={24}
-                  height={24}
-                  className="mr-2"
-                />
                 WhatsApp
               </Button>
             </Link>
-            {/* Versteckter Admin-Link */}
-            <div className="w-1 h-1 opacity-0 hover:opacity-100">
-              <Link href="/auth/login">
-                <span className="w-1 h-1" />
-              </Link>
-            </div>
+            <Link href="/auth/login">
+              <Button
+                variant="ghost"
+                size="icon"
+                className={cn(
+                  "w-8 h-8 p-0 opacity-30 hover:opacity-100 transition-opacity",
+                  !isScrolled && "text-white"
+                )}
+              >
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  className="w-4 h-4"
+                >
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+              </Button>
+            </Link>
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "w-8 h-8 p-0 opacity-30 hover:opacity-100 transition-opacity",
+                !isScrolled && "text-white"
+              )}
+              onClick={handleLogout}
+            >
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                className="w-4 h-4"
+              >
+                <path d="M11 16l-4-4m0 0l4-4m-4 4h12a4 4 0 0 0 4-4V8a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v12a3 3 0 0 0 3 3z" />
+              </svg>
+            </Button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -176,6 +219,28 @@ export function Navbar() {
                     WhatsApp
                   </Button>
                 </Link>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={cn(
+                    "w-8 h-8 p-0 opacity-30 hover:opacity-100 transition-opacity",
+                    !isScrolled && "text-white"
+                  )}
+                  onClick={handleLogout}
+                >
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    className="w-4 h-4"
+                  >
+                    <path d="M11 16l-4-4m0 0l4-4m-4 4h12a4 4 0 0 0 4-4V8a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v12a3 3 0 0 0 3 3z" />
+                  </svg>
+                </Button>
               </div>
             </div>
           </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { supabase } from '@/lib/supabase/client';
 import { format, startOfWeek, addDays, isSameDay } from 'date-fns';
 import { de } from 'date-fns/locale';
 
@@ -17,8 +17,8 @@ interface Booking {
     email: string;
     phone: string;
   };
-  booking_date: string;
-  booking_time: string;
+  date: string;
+  time: string;
   status: 'pending' | 'confirmed' | 'cancelled';
   notes?: string;
 }
@@ -28,7 +28,6 @@ export default function CalendarPage() {
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [weekDates, setWeekDates] = useState<Date[]>([]);
-  const supabase = createClientComponentClient();
 
   useEffect(() => {
     const start = startOfWeek(selectedDate, { locale: de });
@@ -40,27 +39,65 @@ export default function CalendarPage() {
   const fetchBookings = async () => {
     try {
       setLoading(true);
+      
+      // Hole zuerst die Session
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error('Nicht eingeloggt');
+      }
+
+      // Hole das Benutzerprofil
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', session.user.id)
+        .single();
+
+      if (profileError) {
+        console.error('Profilfehler:', profileError);
+        throw new Error('Fehler beim Laden des Profils');
+      }
+
+      if (!profile || profile.role !== 'admin') {
+        throw new Error('Keine Admin-Berechtigung');
+      }
+
+      // Hole die Buchungen
       const { data, error } = await supabase
         .from('bookings')
         .select(`
           *,
-          service:services(name),
-          customer:customers(
+          services (
+            name,
+            duration,
+            price
+          ),
+          customers (
             first_name,
             last_name,
             email,
             phone
           )
         `)
-        .gte('booking_date', format(weekDates[0] || new Date(), 'yyyy-MM-dd'))
-        .lte('booking_date', format(weekDates[6] || new Date(), 'yyyy-MM-dd'))
-        .order('booking_time');
+        .gte('date', format(weekDates[0] || new Date(), 'yyyy-MM-dd'))
+        .lte('date', format(weekDates[6] || new Date(), 'yyyy-MM-dd'))
+        .order('time');
 
-      if (error) throw error;
+      if (error) {
+        console.error('Datenbankfehler:', error);
+        throw new Error('Fehler beim Laden der Buchungen');
+      }
+
+      console.log('Geladene Buchungen:', data);
       setBookings(data || []);
     } catch (error) {
       console.error('Fehler beim Laden der Buchungen:', error);
-      alert('Fehler beim Laden der Buchungen');
+      if (error instanceof Error) {
+        alert(error.message);
+      } else {
+        alert('Ein unbekannter Fehler ist aufgetreten');
+      }
     } finally {
       setLoading(false);
     }
@@ -68,7 +105,7 @@ export default function CalendarPage() {
 
   const getBookingsForDate = (date: Date) => {
     return bookings.filter(booking => 
-      isSameDay(new Date(booking.booking_date), date)
+      isSameDay(new Date(booking.date), date)
     );
   };
 
@@ -143,7 +180,7 @@ export default function CalendarPage() {
                             : 'bg-yellow-100'
                         }`}
                       >
-                        <p className="font-medium text-gray-900">{booking.booking_time}</p>
+                        <p className="font-medium text-gray-900">{booking.time}</p>
                         <p className="font-medium text-pink-600">
                           {booking.customer?.first_name} {booking.customer?.last_name}
                         </p>

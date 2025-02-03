@@ -2,12 +2,17 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ImageContainer } from '@/components/ui/image-container';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useInView } from 'react-intersection-observer';
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useServices } from '@/hooks/useServices';
+import { Service } from '@/lib/services/types';
+import { Clock } from '@/components/icons/clock';
+import { Badge } from '@/components/ui/badge';
 
-// Interfaces bleiben gleich...
 interface Service {
   id: string;
   category: string;
@@ -37,7 +42,7 @@ const services: Service[] = [
     description: 'Sanft schattierte Augenbrauen für einen natürlichen, pudrigen Look. Ideal für einen weichen, definierten Augenbraueneffekt.',
     duration: '120-180 Min',
     price: '399€',
-    image: '/images/WhatsApp Image 2025-01-09 at 22.31.21.jpeg',
+    image: '/images/WhatsApp Image 2024-10-12 at 20.35.10.jpeg',
     benefits: [
       'Natürlicher, pudrig-weicher Look',
       'Langanhaltende Ergebnisse (2-4 Jahre)',
@@ -116,13 +121,33 @@ const services: Service[] = [
     ]
   },
   {
+    id: 'wispy-lashes',
+    category: 'Wimpern',
+    title: 'Wispy Lashes',
+    description: 'Natürlich geschwungene Wimpernverlängerung für einen verspielten, aber eleganten Look. Perfekte Mischung aus Länge und Volumen.',
+    duration: '90 Min',
+    price: '89€',
+    image: '/images/WhatsApp Image 2024-10-12 at 20.33.49.jpeg',
+    benefits: [
+      'Natürlicher Look',
+      'Verspielte Optik',
+      'Leichtes Tragegefühl',
+      'Perfekt für jeden Anlass'
+    ],
+    features: [
+      { icon: '🌿', text: 'Naturseide' },
+      { icon: '💫', text: 'Leichtgewicht' },
+      { icon: '✨', text: 'Anti-Allergen' }
+    ]
+  },
+  {
     id: 'classic-lashes',
     category: 'Wimpern',
     title: 'Classic Lashes',
     description: 'Natürliche Wimpernverlängerung für einen dezenten, aber effektiven Look. Eine Kunstwimper pro Naturwimper.',
     duration: '90 Min',
-    price: '89€',
-    image: '/images/WhatsApp Image 2024-10-12 at 20.33.49.jpeg',
+    price: '99€',
+    image: '/images/classic lashes.jpeg',
     benefits: [
       'Natürlicher Look',
       '1:1 Technik',
@@ -134,26 +159,6 @@ const services: Service[] = [
       { icon: '💫', text: 'Leichtgewicht' },
       { icon: '✨', text: 'Anti-Allergen' }
     ]
-  },
-  {
-    id: 'lash-lift',
-    category: 'Wimpern',
-    title: 'Lash Lift & Tint',
-    description: 'Natürliches Lifting Ihrer eigenen Wimpern mit zusätzlicher Färbung für einen ausdrucksstarken Blick.',
-    duration: '60 Min',
-    price: '69€',
-    image: '/images/WhatsApp Image 2024-10-12 at 20.35.10.jpeg',
-    benefits: [
-      'Hält 6-8 Wochen',
-      'Keine Extensions nötig',
-      'Wasserfest',
-      'Natürlicher Look'
-    ],
-    features: [
-      { icon: '🌊', text: 'Keratin-Behandlung' },
-      { icon: '🎨', text: 'Individuelle Färbung' },
-      { icon: '✨', text: 'Pflegende Wirkstoffe' }
-    ]
   }
 ];
 
@@ -163,72 +168,47 @@ const ServiceCard = ({ service, onClick }: { service: Service; onClick: () => vo
     triggerOnce: true
   });
 
-  const cardVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: {
-        duration: 0.8,
-        ease: "easeOut"
-      }
-    }
-  };
-
   return (
     <motion.div
       ref={ref}
-      variants={cardVariants}
-      initial="hidden"
-      animate={inView ? "visible" : "hidden"}
-      whileHover={{ y: -8, scale: 1.02 }}
-      onClick={onClick}
-      className="cursor-pointer"
+      initial={{ opacity: 0, y: 20 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      exit={{ opacity: 0, y: 20 }}
+      transition={{ duration: 0.5 }}
+      className="relative group"
+      layout
     >
-      <Card className="overflow-hidden group hover:shadow-luxury-hover transition-all duration-500 glass-effect border border-white/20">
-        <div className="relative w-full h-64">
-          <ImageContainer
+      <Card 
+        onClick={onClick}
+        className="service-card overflow-hidden cursor-pointer"
+      >
+        <div className="relative h-[300px] overflow-hidden">
+          <Image
             src={service.image}
             alt={service.title}
-            sizes="(max-width: 768px) 100vw, 50vw"
-            className="transition-transform duration-700 group-hover:scale-110"
-            style={{ height: '16rem' }}
+            fill
+            style={{ objectFit: 'cover' }}
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          
-          {/* Preis-Badge */}
-          <div className="absolute top-4 right-4 gradient-primary text-white px-6 py-2 rounded-full backdrop-blur-md shadow-lg
-            transform translate-x-full group-hover:translate-x-0 transition-transform duration-500 border border-white/20 animate-shimmer">
-            {service.price}
-          </div>
         </div>
-
-        <CardContent className="p-8 relative z-10">
-          <div className="space-y-4">
-            <div>
-              <p className="text-sm font-medium gradient-text mb-2 tracking-wider uppercase animate-shimmer">
-                {service.category}
-              </p>
-              <h3 className="text-2xl font-bold mb-3 group-hover:gradient-text transition-all duration-300">
-                {service.title}
-              </h3>
-              <p className="text-gray-600 line-clamp-2 leading-relaxed">{service.description}</p>
+        <CardContent className="p-6">
+          <div className="mb-2 text-sm font-medium text-primary/80">
+            {service.category}
+          </div>
+          <h3 className="text-2xl font-bold mb-2 group-hover:text-primary transition-colors">
+            {service.title}
+          </h3>
+          <p className="text-gray-600 mb-4 line-clamp-2">
+            {service.description}
+          </p>
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-primary/70" />
+              <span>{service.duration}</span>
             </div>
-
-            <div className="flex items-center justify-between text-sm text-gray-500 pt-4 border-t border-gray-100">
-              <span className="flex items-center glass-effect px-3 py-1 rounded-full">
-                <svg className="w-5 h-5 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                {service.duration}
-              </span>
-              <span className="flex items-center glass-effect px-3 py-1 rounded-full">
-                <svg className="w-5 h-5 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                Premium
-              </span>
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary">Premium</Badge>
             </div>
           </div>
         </CardContent>
@@ -255,12 +235,12 @@ const ServiceModal = ({ service, onClose }: { service: Service; onClose: () => v
       >
         <div className="grid md:grid-cols-2 gap-8">
           <div className="relative w-full h-[400px] md:h-[600px] group">
-            <ImageContainer
+            <Image
               src={service.image}
               alt={service.title}
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className="rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none transition-transform duration-700 group-hover:scale-105"
-              style={{ height: '100%' }}
+              fill
+              style={{ objectFit: 'cover' }}
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               priority
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none" />
@@ -384,7 +364,7 @@ const ServiceModal = ({ service, onClose }: { service: Service; onClose: () => v
                 </span>
               </div>
               <Link
-                href={`/booking?service=${service.id}`}
+                href={`/book?service=${service.id}`}
                 className="gradient-primary hover:opacity-90 text-white px-8 py-3 rounded-full
                   transition-all duration-300 transform hover:scale-105 hover:shadow-luxury font-medium tracking-wide"
               >
@@ -398,16 +378,15 @@ const ServiceModal = ({ service, onClose }: { service: Service; onClose: () => v
   );
 };
 
-const Services = ({ title, subtitle }: ServicesProps) => {
-  const [selectedCategory, setSelectedCategory] = useState('Alle');
+export default function Services({ title, subtitle }: ServicesProps) {
   const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState('Alle');
   const [ref, inView] = useInView({
     threshold: 0.1,
     triggerOnce: true
   });
 
   const categories = ['Alle', 'Wimpern', 'Permanent Make-up'];
-
   const filteredServices = selectedCategory === 'Alle'
     ? services
     : services.filter(service => service.category === selectedCategory);
@@ -482,6 +461,4 @@ const Services = ({ title, subtitle }: ServicesProps) => {
       </div>
     </section>
   );
-};
-
-export default Services;
+}

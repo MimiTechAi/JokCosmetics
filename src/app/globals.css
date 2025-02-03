@@ -1,7 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
+
+@import '../styles/custom.css';
+
 @layer base {
   :root {
     --background: 0 0% 96%;

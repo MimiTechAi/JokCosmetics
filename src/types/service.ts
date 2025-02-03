@@ -1,10 +1,10 @@
 export interface Service {
   id: string;
   name: string;
-  description: string;
-  duration: string | number;
-  price: string | number;
-  category: string;
+  description?: string;
+  duration: number;
+  price: number;
+  category?: string;
   image_url: string;
   is_active: boolean;
 }
@@ -19,7 +19,7 @@ export interface ServiceWithBookings extends Service {
 
 export interface BookingWithService {
   service_id: string;
-  services: Service;
+  service: Service;
 }
 
 export interface MonthlyBooking {
@@ -27,4 +27,5 @@ export interface MonthlyBooking {
   services: {
     price: number;
   };
+  price: number;
 }

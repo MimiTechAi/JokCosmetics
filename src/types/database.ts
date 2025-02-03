@@ -6,28 +6,108 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export type DayOfWeek = 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday'
-
 export interface Database {
   public: {
     Tables: {
       services: {
         Row: {
           id: string
-          name: string
+          category_id: string | null
+          title: string
           description: string
-          duration: number
-          price: number
-          category: string
+          duration: string
+          price: string
           image_url: string | null
+          benefits: string[] | null
+          features: Json | null
+          techniques: string[] | null
+          is_active: boolean
+          sort_order: number
+          slug: string | null
+          seo_title: string | null
+          seo_description: string | null
+          video_url: string | null
+          before_after_images: string[] | null
+          custom_fields: Json | null
           created_at: string
           updated_at: string
-          available_days: DayOfWeek[]
-          max_daily_bookings: number
-          is_active: boolean
         }
-        Insert: Omit<Database['public']['Tables']['services']['Row'], 'id' | 'created_at' | 'updated_at'>
-        Update: Partial<Database['public']['Tables']['services']['Insert']>
+        Insert: {
+          id?: string
+          category_id?: string | null
+          title: string
+          description: string
+          duration: string
+          price: string
+          image_url?: string | null
+          benefits?: string[] | null
+          features?: Json | null
+          techniques?: string[] | null
+          is_active?: boolean
+          sort_order?: number
+          slug?: string | null
+          seo_title?: string | null
+          seo_description?: string | null
+          video_url?: string | null
+          before_after_images?: string[] | null
+          custom_fields?: Json | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          category_id?: string | null
+          title?: string
+          description?: string
+          duration?: string
+          price?: string
+          image_url?: string | null
+          benefits?: string[] | null
+          features?: Json | null
+          techniques?: string[] | null
+          is_active?: boolean
+          sort_order?: number
+          slug?: string | null
+          seo_title?: string | null
+          seo_description?: string | null
+          video_url?: string | null
+          before_after_images?: string[] | null
+          custom_fields?: Json | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      service_categories: {
+        Row: {
+          id: string
+          name: string
+          description: string | null
+          image_url: string | null
+          sort_order: number
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          description?: string | null
+          image_url?: string | null
+          sort_order?: number
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          description?: string | null
+          image_url?: string | null
+          sort_order?: number
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
       }
       customers: {
         Row: {
@@ -62,7 +142,7 @@ export interface Database {
       business_hours: {
         Row: {
           id: string
-          day_of_week: DayOfWeek
+          day_of_week: 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday'
           open_time: string
           close_time: string
           is_closed: boolean

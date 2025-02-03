@@ -5,7 +5,7 @@ import { Database } from '@/types/database'
 // Singleton-Instanz für den Server-Client
 let serverClientInstance: ReturnType<typeof createServerClient<Database>> | null = null;
 
-export const createClient = () => {
+export function createClient() {
   if (serverClientInstance) return serverClientInstance;
 
   const cookieStore = cookies()
@@ -20,16 +20,25 @@ export const createClient = () => {
         },
         set(name: string, value: string, options: CookieOptions) {
           try {
-            cookieStore.set({ name, value, ...options })
+            cookieStore.set(name, value, options as any)
           } catch (error) {
-            // Handle cookies in edge functions
+            // Handle cookie errors in development
+            if (process.env.NODE_ENV === 'development') {
+              console.warn('Cookie set error:', error)
+            }
           }
         },
         remove(name: string, options: CookieOptions) {
           try {
-            cookieStore.set({ name, value: '', ...options })
+            cookieStore.set(name, '', {
+              ...options,
+              maxAge: 0,
+            })
           } catch (error) {
-            // Handle cookies in edge functions
+            // Handle cookie errors in development
+            if (process.env.NODE_ENV === 'development') {
+              console.warn('Cookie remove error:', error)
+            }
           }
         },
       },

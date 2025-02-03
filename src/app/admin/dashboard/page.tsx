@@ -3,8 +3,8 @@
 import { useDashboard } from '@/hooks/useDashboard';
 import { DashboardStats } from '@/components/admin/DashboardStats';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar } from "../components/Calendar";
-import { BookingManagement } from "../components/BookingManagement";
+import { Calendar } from "@/components/admin/Calendar";
+import { BookingManagement } from "@/components/admin/BookingManagement";
 
 export default function DashboardPage() {
   const {
