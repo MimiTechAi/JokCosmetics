@@ -2,18 +2,19 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase/client';
+import { createClient } from '@/utils/supabase/client';
+import { Button } from '@/components/ui/button';
 
 export default function AdminPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
-  const [adminEmail, setAdminEmail] = useState('');
+  const supabase = createClient();
 
   useEffect(() => {
-    const checkAuth = async () => {
+    async function checkAuth() {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        
+
         if (!session) {
           router.push('/auth/login');
           return;
@@ -21,7 +22,7 @@ export default function AdminPage() {
 
         const { data: profile } = await supabase
           .from('profiles')
-          .select('role, email')
+          .select('role')
           .eq('id', session.user.id)
           .single();
 
@@ -30,16 +31,15 @@ export default function AdminPage() {
           return;
         }
 
-        setAdminEmail(profile.email || session.user.email || '');
         setIsLoading(false);
       } catch (error) {
         console.error('Auth check error:', error);
         router.push('/auth/login');
       }
-    };
+    }
 
     checkAuth();
-  }, [router]);
+  }, [router, supabase]);
 
   const handleLogout = async () => {
     try {
@@ -52,51 +52,61 @@ export default function AdminPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-pink-500"></div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Header */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
-          <h1 className="text-2xl font-semibold text-gray-900">Admin Dashboard</h1>
-          <div className="flex items-center space-x-4">
-            <span className="text-sm text-gray-600">{adminEmail}</span>
-            <button
-              onClick={handleLogout}
-              className="px-4 py-2 bg-pink-600 text-white rounded-md hover:bg-pink-700 transition-colors"
-            >
-              Abmelden
-            </button>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold gradient-text">
+            Admin Dashboard
+          </h1>
+          <Button 
+            variant="luxury"
+            onClick={handleLogout}
+            className="ml-4"
+          >
+            Abmelden
+          </Button>
         </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white shadow rounded-lg p-6">
-          <h2 className="text-lg font-medium mb-4">Willkommen im Admin-Bereich</h2>
-          <p className="text-gray-600">
-            Hier können Sie Ihre Website verwalten. Weitere Funktionen werden in Kürze hinzugefügt.
+        
+        <div className="luxury-card">
+          <h2 className="text-xl font-semibold gradient-text mb-4">
+            Willkommen im Admin-Bereich
+          </h2>
+          <p className="text-muted-foreground">
+            Hier können Sie Ihre Website-Inhalte verwalten.
           </p>
-        </div>
-
-        {/* Placeholder für zukünftige Features */}
-        <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {['Buchungen', 'Kunden', 'Einstellungen'].map((feature) => (
-            <div key={feature} className="bg-white shadow rounded-lg p-6">
-              <h3 className="text-lg font-medium mb-2">{feature}</h3>
-              <p className="text-gray-600">
-                Diese Funktion wird in Kürze verfügbar sein.
+          
+          {/* Admin Funktionen hier */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+            <div className="luxury-card hover:scale-105 transition-transform cursor-pointer">
+              <h3 className="text-lg font-semibold mb-2">Dienstleistungen</h3>
+              <p className="text-sm text-muted-foreground">
+                Verwalten Sie Ihre Dienstleistungen und Preise
               </p>
             </div>
-          ))}
+            
+            <div className="luxury-card hover:scale-105 transition-transform cursor-pointer">
+              <h3 className="text-lg font-semibold mb-2">Termine</h3>
+              <p className="text-sm text-muted-foreground">
+                Überblick über alle Buchungen und Termine
+              </p>
+            </div>
+            
+            <div className="luxury-card hover:scale-105 transition-transform cursor-pointer">
+              <h3 className="text-lg font-semibold mb-2">Einstellungen</h3>
+              <p className="text-sm text-muted-foreground">
+                Bearbeiten Sie die Website-Einstellungen
+              </p>
+            </div>
+          </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

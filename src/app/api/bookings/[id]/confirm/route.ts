@@ -1,21 +1,25 @@
 import { createClient } from '@/utils/supabase/server';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+
+export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function POST(
-  request: Request,
+  req: NextRequest,
   context: { params: { id: string } }
 ) {
-  const supabase = await createClient();
-
-  if (!context.params.id) {
-    return NextResponse.json(
-      { error: 'Buchungs-ID fehlt' },
-      { status: 400 }
-    );
-  }
-
   try {
-    // Überprüfe Admin-Berechtigung
+    const { id } = context.params;
+    
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Ungültige Buchungs-ID' },
+        { status: 400 }
+      );
+    }
+
+    const supabase = await createClient();
     const { data: { session } } = await supabase.auth.getSession();
 
     if (!session?.user) {
@@ -25,11 +29,10 @@ export async function POST(
       );
     }
 
-    // Hole die Buchung
     const { data: booking, error: bookingError } = await supabase
       .from('bookings')
       .select('*')
-      .eq('id', context.params.id)
+      .eq('id', id)
       .single();
 
     if (bookingError || !booking) {
@@ -39,11 +42,10 @@ export async function POST(
       );
     }
 
-    // Aktualisiere den Status der Buchung
     const { error: updateError } = await supabase
       .from('bookings')
       .update({ status: 'confirmed' })
-      .eq('id', context.params.id);
+      .eq('id', id);
 
     if (updateError) {
       return NextResponse.json(
@@ -54,7 +56,7 @@ export async function POST(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error confirming booking:', error);
+    console.error('Error in booking confirmation:', error);
     return NextResponse.json(
       { error: 'Interner Server-Fehler' },
       { status: 500 }

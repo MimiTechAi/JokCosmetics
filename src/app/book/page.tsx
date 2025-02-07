@@ -1,43 +1,27 @@
-import { createClient } from '@/utils/supabase/server';
+import { cookies } from 'next/headers';
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import type { Database } from '@/types/database';
 import { BookingForm } from '@/components/BookingForm';
+import { PageContainer } from '@/components/PageContainer';
+
+interface Service {
+  id: string;
+  title: string;
+  description: string;
+  duration: string;
+  price: number;
+  category_id: string;
+  service_categories: {
+    id: string;
+    name: string;
+  } | null;
+}
 
 async function getServices() {
   try {
-    console.log('Creating Supabase client...');
-    console.log('SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
-    
-    // Debug: Umgebungsvariablen
-    console.log('Environment check:', {
-      url: process.env.NEXT_PUBLIC_SUPABASE_URL?.substring(0, 10) + '...',
-      hasKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    });
+    const cookieStore = cookies();
+    const supabase = createServerComponentClient<Database>({ cookies: () => cookieStore });
 
-    // Supabase Client erstellen
-    const supabase = await createClient();
-    
-    // Debug: Einfache Testabfrage
-    const { data: test, error: testError } = await supabase
-      .from('services')
-      .select('count')
-      .single();
-      
-    if (testError) {
-      console.error('Test query failed:', {
-        code: testError.code,
-        message: testError.message,
-        details: testError.details,
-        hint: testError.hint
-      });
-      throw testError;
-    }
-
-    console.log('Supabase client created successfully');
-    
-    console.log('Fetching services from Supabase...');
-    
-    // Hauptabfrage
-    console.log('Running main query...');
     const { data: services, error } = await supabase
       .from('services')
       .select(`
@@ -46,72 +30,83 @@ async function getServices() {
         description,
         duration,
         price,
-        image_url,
-        is_active,
         category_id,
         service_categories (
+          id,
           name
         )
       `)
-      .eq('is_active', true)
-      .order('sort_order', { ascending: true });
-    
+      .order('sort_order');
+
     if (error) {
-      console.error('Main query error:', {
-        code: error.code,
-        message: error.message,
-        details: error.details,
-        hint: error.hint
-      });
       throw error;
     }
 
-    if (!services || services.length === 0) {
-      console.log('No services found in database');
-      return [];
-    }
+    const formattedServices = services.map((service) => ({
+      ...service,
+      price: parseFloat(service.price.toString())
+    }));
 
-    console.log('Query successful, found services:', services.length);
-    console.log('Successfully fetched services:', services);
-    return services;
+    return formattedServices;
   } catch (error) {
-    // Detaillierte Fehlerausgabe
-    const errorDetails = {
-      name: error instanceof Error ? error.name : 'Unknown',
-      message: error instanceof Error ? error.message : String(error),
-      code: error && typeof error === 'object' && 'code' in error ? error.code : undefined,
-      details: error && typeof error === 'object' && 'details' in error ? error.details : undefined,
-      hint: error && typeof error === 'object' && 'hint' in error ? error.hint : undefined,
-    };
-    console.error('Failed to fetch services:', errorDetails);
-    throw error; // Re-throw to show the actual error in the UI
+    console.error('Error in getServices:', error);
+    return [];
   }
 }
 
-export default async function BookPage({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined };
-}) {
+export default async function BookPage() {
   const services = await getServices();
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-center mb-8">Termin buchen</h1>
-      {services && services.length > 0 ? (
-        <BookingForm
-          services={services}
-          initialServiceId={
-            searchParams?.service && typeof searchParams.service === 'string'
-              ? searchParams.service
-              : undefined
-          }
-        />
-      ) : (
-        <p className="text-center text-gray-600">
-          Aktuell sind keine Dienstleistungen verfügbar.
-        </p>
-      )}
-    </div>
+    <PageContainer>
+      <div className="container mx-auto px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold gradient-text mb-4">
+              Buchen Sie Ihren Termin
+            </h1>
+            <p className="text-gray-600 text-lg">
+              Wählen Sie Ihre gewünschte Behandlung und finden Sie einen passenden Termin
+            </p>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-xl p-8 backdrop-blur-sm bg-opacity-90">
+            <BookingForm services={services} />
+          </div>
+
+          <div className="mt-12 grid md:grid-cols-3 gap-8 text-center">
+            <div className="p-6 rounded-xl bg-white shadow-lg">
+              <div className="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Flexible Termine</h3>
+              <p className="text-gray-600">Wählen Sie aus verschiedenen Terminen, die am besten zu Ihrem Zeitplan passen</p>
+            </div>
+
+            <div className="p-6 rounded-xl bg-white shadow-lg">
+              <div className="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Professioneller Service</h3>
+              <p className="text-gray-600">Genießen Sie erstklassige Behandlungen von unseren erfahrenen Experten</p>
+            </div>
+
+            <div className="p-6 rounded-xl bg-white shadow-lg">
+              <div className="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Sichere Buchung</h3>
+              <p className="text-gray-600">Einfache und sichere Online-Terminbuchung mit sofortiger Bestätigung</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </PageContainer>
   );
 }

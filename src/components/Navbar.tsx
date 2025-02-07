@@ -6,13 +6,14 @@ import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase/client';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
-  const [scrollProgress, setScrollProgress] = useState(0)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -21,45 +22,54 @@ export function Navbar() {
 
   useEffect(() => {
     const handleScroll = () => {
-      const heroHeight = document.getElementById('hero')?.offsetHeight || 0
-      const scrollY = window.scrollY
-      const progress = Math.min(scrollY / (heroHeight * 0.8), 1)
-      setScrollProgress(progress)
+      setIsScrolled(window.scrollY > 20)
     }
 
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  const scrollToSection = (id: string) => {
-    const element = document.getElementById(id)
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' })
-    }
-  }
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .single();
+        
+        setIsAdmin(profile?.role === 'admin');
+      }
+    };
+    
+    checkAdmin();
+  }, []);
+
+  const isHomePage = pathname === '/';
 
   const navLinks = [
-    { href: '#', label: 'Start', onClick: () => window.scrollTo({ top: 0, behavior: 'smooth' }) },
-    { href: '#services', label: 'Dienstleistungen', onClick: () => scrollToSection('services') },
-    { href: '#gallery', label: 'Galerie', onClick: () => scrollToSection('gallery') },
-    { href: '#about', label: 'Über', onClick: () => scrollToSection('about') },
-    { href: '#contact', label: 'Kontakt', onClick: () => scrollToSection('contact') },
+    { href: '/', label: 'Start' },
+    { href: '/services', label: 'Dienstleistungen' },
+    { href: '/gallery', label: 'Galerie' },
+    { href: '/about', label: 'Über' },
+    { href: '/contact', label: 'Kontakt' },
+    ...(isAdmin ? [{ href: '/admin', label: 'Admin' }] : []),
   ]
 
   return (
-    <nav
-      className={cn(
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-300 w-full',
-        isScrolled ? 'bg-white/90 backdrop-blur-md shadow-md' : 'bg-transparent'
-      )}
-    >
-      <div className="w-full px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20 max-w-[2000px] mx-auto">
+    <header className={cn(
+      'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
+      isScrolled ? 'bg-[#2D1B2D]/95 backdrop-blur-md shadow-lg' : 'bg-transparent',
+      !isHomePage && 'bg-[#2D1B2D] shadow-lg'
+    )}>
+      <nav className="w-full px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-20 max-w-7xl mx-auto">
           {/* Logo */}
-          <Link href="/" className="flex items-center py-2">
+          <Link href="/" className="flex items-center">
             <div className={cn(
-              "relative transition-all duration-300 w-[240px]",
-              isScrolled ? "opacity-90" : "opacity-100"
+              "relative transition-all duration-300",
+              isScrolled ? "w-[200px]" : "w-[240px]"
             )}>
               <Image
                 src="/images/logo/jok-text-logo.svg"
@@ -68,7 +78,7 @@ export function Navbar() {
                 height={60}
                 className={cn(
                   "h-10 w-auto transition-all duration-300",
-                  isScrolled ? "filter brightness-0" : "filter brightness-100"
+                  isScrolled ? "opacity-90" : "opacity-100"
                 )}
                 priority
               />
@@ -82,170 +92,88 @@ export function Navbar() {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "transition-colors font-medium",
-                  isScrolled 
-                    ? "text-black hover:text-gray-600" 
-                    : "text-white hover:text-white/80"
+                  "transition-colors font-medium text-white/90 hover:text-white",
+                  "relative py-2 after:absolute after:bottom-0 after:left-0 after:h-0.5",
+                  "after:w-0 after:bg-white after:transition-all after:duration-300 hover:after:w-full",
+                  pathname === link.href && "text-white after:w-full"
                 )}
               >
                 {link.label}
               </Link>
             ))}
-            <Link href="/book">
-              <Button 
-                variant="default" 
-                size="lg"
-                className={cn(
-                  "transition-all",
-                  !isScrolled && "bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white border border-white/30"
-                )}
-              >
-                Termin buchen
-              </Button>
-            </Link>
-            <Link href="https://wa.me/4917353909280" target="_blank">
-              <Button 
-                variant="secondary" 
-                size="lg" 
-                className={cn(
-                  "transition-all",
-                  !isScrolled && "bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white"
-                )}
-              >
-                WhatsApp
-              </Button>
-            </Link>
-            <Link href="/auth/login">
-              <Button
-                variant="ghost"
-                size="icon"
-                className={cn(
-                  "w-8 h-8 p-0 opacity-30 hover:opacity-100 transition-opacity",
-                  !isScrolled && "text-white"
-                )}
-              >
-                <svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  className="w-4 h-4"
-                >
-                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
-                  <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                </svg>
-              </Button>
-            </Link>
+            
             <Button
-              variant="ghost"
-              size="icon"
-              className={cn(
-                "w-8 h-8 p-0 opacity-30 hover:opacity-100 transition-opacity",
-                !isScrolled && "text-white"
-              )}
-              onClick={handleLogout}
+              asChild
+              size="lg"
+              className="bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white shadow-md hover:shadow-lg transition-all duration-300"
             >
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2" 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                className="w-4 h-4"
-              >
-                <path d="M11 16l-4-4m0 0l4-4m-4 4h12a4 4 0 0 0 4-4V8a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v12a3 3 0 0 0 3 3z" />
-              </svg>
+              <Link href="/book">
+                Termin buchen
+              </Link>
             </Button>
           </div>
 
           {/* Mobile Menu Button */}
           <button
-            aria-label={isMobileMenuOpen ? "Menü schließen" : "Menü öffnen"}
-            className="md:hidden p-2"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            aria-expanded={isMobileMenuOpen ? "true" : "false"}
+            className="md:hidden p-2 rounded-lg text-white hover:bg-white/10 transition-colors"
           >
-            <div className={cn(
-              "w-6 h-0.5 mb-1.5 transition-colors",
-              isScrolled ? "bg-black" : "bg-white"
-            )} />
-            <div className={cn(
-              "w-6 h-0.5 mb-1.5 transition-colors",
-              isScrolled ? "bg-black" : "bg-white"
-            )} />
-            <div className={cn(
-              "w-6 h-0.5 transition-colors",
-              isScrolled ? "bg-black" : "bg-white"
-            )} />
+            <svg
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              {isMobileMenuOpen ? (
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              ) : (
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              )}
+            </svg>
           </button>
         </div>
 
         {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden bg-white/95 backdrop-blur-md border-t border-gray-200">
-            <div className="flex flex-col space-y-4 py-4">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="text-black hover:text-gray-600 px-4 py-2 font-medium"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {link.label}
-                </Link>
-              ))}
-              <div className="px-4 space-y-2">
-                <Link href="/book" className="block">
-                  <Button variant="default" className="w-full">
-                    Termin buchen
-                  </Button>
-                </Link>
-                <Link href="https://wa.me/4917353909280" target="_blank" className="block">
-                  <Button variant="secondary" className="w-full whatsapp-btn">
-                    <Image
-                      src="/images/whatsapp.svg"
-                      alt="WhatsApp"
-                      width={24}
-                      height={24}
-                      className="mr-2"
-                    />
-                    WhatsApp
-                  </Button>
-                </Link>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={cn(
-                    "w-8 h-8 p-0 opacity-30 hover:opacity-100 transition-opacity",
-                    !isScrolled && "text-white"
-                  )}
-                  onClick={handleLogout}
-                >
-                  <svg 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="2" 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    className="w-4 h-4"
-                  >
-                    <path d="M11 16l-4-4m0 0l4-4m-4 4h12a4 4 0 0 0 4-4V8a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v12a3 3 0 0 0 3 3z" />
-                  </svg>
-                </Button>
-              </div>
-            </div>
+        <div
+          className={cn(
+            "md:hidden transition-all duration-300 overflow-hidden",
+            isMobileMenuOpen ? "max-h-96" : "max-h-0"
+          )}
+        >
+          <div className="px-2 pt-2 pb-3 space-y-1">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={cn(
+                  "block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-white/10 transition-colors",
+                  pathname === link.href && "bg-white/10"
+                )}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {link.label}
+              </Link>
+            ))}
+            <Link
+              href="/book"
+              className="block px-3 py-2 rounded-md text-base font-medium text-white bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 transition-colors"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Termin buchen
+            </Link>
           </div>
-        )}
-      </div>
-    </nav>
-  )
+        </div>
+      </nav>
+    </header>
+  );
 }

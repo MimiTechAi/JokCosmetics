@@ -1,49 +1,24 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
-import { cookies } from 'next/headers'
-import { Database } from '@/types/database'
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { cookies } from 'next/headers';
+import { Database } from '@/types/database';
 
 // Singleton-Instanz für den Server-Client
-let serverClientInstance: ReturnType<typeof createServerClient<Database>> | null = null;
+let serverClientInstance: ReturnType<typeof createServerComponentClient<Database>> | null = null;
 
-export function createClient() {
+export const createClient = () => {
   if (serverClientInstance) return serverClientInstance;
 
-  const cookieStore = cookies()
-
-  serverClientInstance = createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value
-        },
-        set(name: string, value: string, options: CookieOptions) {
-          try {
-            cookieStore.set(name, value, options as any)
-          } catch (error) {
-            // Handle cookie errors in development
-            if (process.env.NODE_ENV === 'development') {
-              console.warn('Cookie set error:', error)
-            }
-          }
-        },
-        remove(name: string, options: CookieOptions) {
-          try {
-            cookieStore.set(name, '', {
-              ...options,
-              maxAge: 0,
-            })
-          } catch (error) {
-            // Handle cookie errors in development
-            if (process.env.NODE_ENV === 'development') {
-              console.warn('Cookie remove error:', error)
-            }
-          }
-        },
-      },
-    }
-  )
+  const cookieStore = cookies();
+  serverClientInstance = createServerComponentClient<Database>({
+    cookies: () => cookieStore,
+  });
 
   return serverClientInstance;
-}
+};
+
+export const getServerSupabaseClient = () => {
+  const cookieStore = cookies();
+  return createServerComponentClient<Database>({
+    cookies: () => cookieStore,
+  });
+};

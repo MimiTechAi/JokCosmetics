@@ -1,109 +1,108 @@
-import { Metadata } from 'next'
+'use client';
 
-export const metadata: Metadata = {
-  title: 'Datenschutz | Jok Cosmetics',
-  description: 'Datenschutzerklärung von Jok Cosmetics by Thansuda',
-}
+import { motion } from 'framer-motion';
+import { useInView } from 'react-intersection-observer';
+import { PageContainer } from '@/components/PageContainer';
 
 export default function DatenschutzPage() {
+  const [ref, inView] = useInView({
+    threshold: 0.1,
+    triggerOnce: true,
+  });
+
   return (
-    <div className="container mx-auto px-4 py-16 max-w-4xl">
-      <h1 className="text-4xl font-bold mb-8">Datenschutzerklärung</h1>
-      
-      <div className="prose prose-lg">
-        <h2>1. Datenschutz auf einen Blick</h2>
-        <h3>Allgemeine Hinweise</h3>
-        <p>
-          Die folgenden Hinweise geben einen einfachen Überblick darüber, was mit Ihren personenbezogenen Daten 
-          passiert, wenn Sie diese Website besuchen. Personenbezogene Daten sind alle Daten, mit denen Sie 
-          persönlich identifiziert werden können.
-        </p>
+    <PageContainer>
+      <div ref={ref} className="max-w-4xl mx-auto px-4 pb-16 sm:px-6 lg:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-12"
+        >
+          <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-pink-600 to-pink-400">
+            Datenschutzerklärung
+          </h1>
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+            Informationen zum Schutz und zur Verarbeitung Ihrer personenbezogenen Daten
+          </p>
+        </motion.div>
 
-        <h3>Datenerfassung auf dieser Website</h3>
-        <h4>Wer ist verantwortlich für die Datenerfassung auf dieser Website?</h4>
-        <p>
-          Die Datenverarbeitung auf dieser Website erfolgt durch den Websitebetreiber. Die Kontaktdaten 
-          können Sie dem Impressum dieser Website entnehmen.
-        </p>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="space-y-8"
+        >
+          <div className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition-shadow duration-300">
+            <h2 className="text-2xl font-bold text-pink-600 mb-4">1. Datenschutz auf einen Blick</h2>
+            <div className="prose prose-pink max-w-none">
+              <p className="text-gray-600 leading-relaxed">
+                Der Schutz Ihrer persönlichen Daten ist uns ein wichtiges Anliegen. Diese 
+                Datenschutzerklärung informiert Sie über Art, Umfang und Zweck der Erhebung 
+                und Verwendung personenbezogener Daten bei JOK Cosmetics.
+              </p>
+            </div>
+          </div>
 
-        <h2>2. Allgemeine Hinweise und Pflichtinformationen</h2>
-        <h3>Datenschutz</h3>
-        <p>
-          Die Betreiber dieser Seiten nehmen den Schutz Ihrer persönlichen Daten sehr ernst. Wir behandeln 
-          Ihre personenbezogenen Daten vertraulich und entsprechend der gesetzlichen Datenschutzvorschriften 
-          sowie dieser Datenschutzerklärung.
-        </p>
+          <div className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition-shadow duration-300">
+            <h2 className="text-2xl font-bold text-pink-600 mb-4">2. Verantwortliche Stelle</h2>
+            <div className="prose prose-pink max-w-none">
+              <p className="text-gray-600 leading-relaxed">
+                Verantwortlich für die Datenverarbeitung ist:<br />
+                JOK Cosmetics<br />
+                Wilhelmstraße 17<br />
+                75378 Bad Liebenzell<br />
+                Deutschland
+              </p>
+            </div>
+          </div>
 
-        <h3>Hinweis zur verantwortlichen Stelle</h3>
-        <p>
-          Die verantwortliche Stelle für die Datenverarbeitung auf dieser Website ist:<br/>
-          Jok Cosmetics by Thansuda<br/>
-          [Ihre Adresse]<br/>
-          [Ihre Kontaktdaten]
-        </p>
+          <div className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition-shadow duration-300">
+            <h2 className="text-2xl font-bold text-pink-600 mb-4">3. Datenerfassung beim Besuch unserer Website</h2>
+            <div className="prose prose-pink max-w-none">
+              <p className="text-gray-600 leading-relaxed">
+                Bei der Nutzung unserer Website werden nur die technisch notwendigen Daten erfasst. 
+                Wir verwenden Cookies nur in dem für die Funktionalität der Website erforderlichen Umfang. 
+                Die Datenverarbeitung erfolgt auf Grundlage von Art. 6 Abs. 1 DSGVO.
+              </p>
+            </div>
+          </div>
 
-        <h2>3. Datenerfassung auf dieser Website</h2>
-        <h3>Cookies</h3>
-        <p>
-          Unsere Website verwendet Cookies. Das sind kleine Textdateien, die Ihr Webbrowser auf Ihrem Endgerät 
-          speichert. Cookies helfen uns dabei, unser Angebot nutzerfreundlicher, effektiver und sicherer zu machen.
-        </p>
-        <p>
-          Einige Cookies sind "Session-Cookies." Solche Cookies werden nach Ende Ihrer Browser-Sitzung von 
-          selbst gelöscht. Hingegen bleiben andere Cookies auf Ihrem Endgerät bestehen, bis Sie diese selbst 
-          löschen. Solche Cookies helfen uns, Sie bei Rückkehr auf unserer Website wiederzuerkennen.
-        </p>
+          <div className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition-shadow duration-300">
+            <h2 className="text-2xl font-bold text-pink-600 mb-4">4. Terminbuchung und Kundendaten</h2>
+            <div className="prose prose-pink max-w-none">
+              <p className="text-gray-600 leading-relaxed">
+                Bei der Buchung eines Termins erheben wir die für die Durchführung der Dienstleistung 
+                erforderlichen Daten. Diese werden ausschließlich für die Terminverwaltung und 
+                Kundenbetreuung verwendet und nicht an Dritte weitergegeben.
+              </p>
+            </div>
+          </div>
 
-        <h3>Buchungssystem</h3>
-        <p>
-          Wenn Sie über unsere Website einen Termin buchen, werden die von Ihnen eingegebenen Daten zur 
-          Terminverwaltung und Kontaktaufnahme gespeichert. Diese Daten geben wir nicht ohne Ihre 
-          Einwilligung weiter.
-        </p>
+          <div className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition-shadow duration-300">
+            <h2 className="text-2xl font-bold text-pink-600 mb-4">5. Ihre Rechte</h2>
+            <div className="prose prose-pink max-w-none">
+              <p className="text-gray-600 leading-relaxed">
+                Sie haben das Recht auf Auskunft, Berichtigung, Löschung und Einschränkung der 
+                Verarbeitung Ihrer personenbezogenen Daten. Bei Fragen zum Datenschutz können 
+                Sie sich jederzeit an uns wenden.
+              </p>
+            </div>
+          </div>
+        </motion.div>
 
-        <h3>Server-Log-Dateien</h3>
-        <p>
-          Der Provider der Seiten erhebt und speichert automatisch Informationen in so genannten 
-          Server-Log-Dateien, die Ihr Browser automatisch an uns übermittelt. Dies sind:
-        </p>
-        <ul>
-          <li>Browsertyp und Browserversion</li>
-          <li>Verwendetes Betriebssystem</li>
-          <li>Referrer URL</li>
-          <li>Hostname des zugreifenden Rechners</li>
-          <li>Uhrzeit der Serveranfrage</li>
-          <li>IP-Adresse</li>
-        </ul>
-
-        <h2>4. Analyse-Tools und Werbung</h2>
-        <h3>Google Analytics</h3>
-        <p>
-          Diese Website nutzt Funktionen des Webanalysedienstes Google Analytics. Anbieter ist die Google 
-          Ireland Limited ("Google"), Gordon House, Barrow Street, Dublin 4, Irland.
-        </p>
-
-        <h2>5. Plugins und Tools</h2>
-        <h3>Google Maps</h3>
-        <p>
-          Diese Seite nutzt den Kartendienst Google Maps. Anbieter ist die Google Ireland Limited ("Google"), 
-          Gordon House, Barrow Street, Dublin 4, Irland.
-        </p>
-
-        <h2>6. Ihre Rechte</h2>
-        <p>Sie haben folgende Rechte:</p>
-        <ul>
-          <li>Recht auf Auskunft</li>
-          <li>Recht auf Berichtigung oder Löschung</li>
-          <li>Recht auf Einschränkung der Verarbeitung</li>
-          <li>Recht auf Widerspruch gegen die Verarbeitung</li>
-          <li>Recht auf Datenübertragbarkeit</li>
-        </ul>
-
-        <div className="mt-8">
-          <p>Stand: Januar 2025</p>
-          <p>Jok Cosmetics by Thansuda</p>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="mt-12 text-center"
+        >
+          <p className="text-gray-600">
+            Stand: Februar 2024<br />
+            JOK Cosmetics
+          </p>
+        </motion.div>
       </div>
-    </div>
-  )
+    </PageContainer>
+  );
 }

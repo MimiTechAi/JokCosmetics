@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase/client';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -11,16 +11,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  // Prüfe beim Laden, ob bereits eine Session existiert
-  useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        router.push('/admin');
-      }
-    };
-    checkSession();
-  }, [router]);
+  const supabase = createClientComponentClient();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,155 +19,99 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      // Versuche den Login
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password
       });
 
-      if (signInError) {
-        if (signInError.message.includes('Invalid login credentials')) {
-          // Wenn der Login fehlschlägt, versuche eine Registrierung
-          const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-            email,
-            password
-          });
+      if (signInError) throw signInError;
 
-          if (signUpError) throw signUpError;
-
-          // Erstelle das Admin-Profil
-          if (signUpData?.user) {
-            const { error: profileError } = await supabase
-              .from('profiles')
-              .insert([
-                {
-                  id: signUpData.user.id,
-                  email: signUpData.user.email,
-                  role: 'admin'
-                }
-              ]);
-
-            if (profileError) throw profileError;
-
-            // Versuche erneut den Login
-            const { error: newSignInError } = await supabase.auth.signInWithPassword({
-              email,
-              password
-            });
-
-            if (newSignInError) throw newSignInError;
-          }
-        } else {
-          throw signInError;
-        }
+      if (!data?.session) {
+        throw new Error('Keine Session nach Login');
       }
 
-      // Prüfe die Admin-Rolle
-      const { data: profile } = await supabase
+      // Check admin role
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('role')
-        .eq('id', signInData?.session?.user.id)
+        .eq('id', data.session.user.id)
         .single();
 
-      if (!profile?.role || profile.role !== 'admin') {
-        throw new Error('Keine Admin-Berechtigung');
+      if (profileError || !profile || profile.role !== 'admin') {
+        throw new Error('Kein Administratorzugriff');
       }
 
-      // Erfolgreich eingeloggt, leite weiter
-      console.log('Login erfolgreich, leite weiter...');
       router.push('/admin');
       router.refresh();
-
-    } catch (error: any) {
-      console.error('Login Fehler:', error);
-      if (error.message === 'User already registered') {
-        setError('Bitte melden Sie sich mit Ihrem Passwort an.');
-      } else if (error.message === 'Invalid login credentials') {
-        setError('Ungültige Anmeldedaten. Bitte überprüfen Sie E-Mail und Passwort.');
-      } else if (error.message === 'Keine Admin-Berechtigung') {
-        setError('Sie haben keine Admin-Berechtigung.');
-      } else {
-        setError('Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.');
-      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError(
+        err instanceof Error 
+          ? err.message 
+          : 'Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.'
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-xl shadow-lg">
-        <div className="text-center">
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-            JOK Cosmetics Admin
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Bitte melden Sie sich an
-          </p>
-        </div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-secondary/5">
+      <div className="w-full max-w-md">
+        <div className="luxury-card">
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-bold gradient-text mb-2">
+              Admin Login
+            </h1>
+            <p className="text-muted-foreground">
+              Bitte melden Sie sich an, um fortzufahren
+            </p>
+          </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleLogin}>
-          <div className="rounded-md shadow-sm -space-y-px">
+          <form onSubmit={handleLogin} className="space-y-6">
             <div>
-              <label htmlFor="email" className="sr-only">
-                E-Mail
+              <label htmlFor="email" className="block text-sm font-medium mb-2">
+                Email
               </label>
               <input
                 id="email"
-                name="email"
                 type="email"
-                required
-                className="appearance-none rounded-t-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-pink-500 focus:border-pink-500 focus:z-10 sm:text-sm"
-                placeholder="E-Mail"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                autoComplete="email"
+                className="w-full px-4 py-2 rounded-md border border-input bg-background"
+                required
               />
             </div>
+
             <div>
-              <label htmlFor="password" className="sr-only">
+              <label htmlFor="password" className="block text-sm font-medium mb-2">
                 Passwort
               </label>
               <input
                 id="password"
-                name="password"
                 type="password"
-                required
-                className="appearance-none rounded-b-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-pink-500 focus:border-pink-500 focus:z-10 sm:text-sm"
-                placeholder="Passwort"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                autoComplete="current-password"
+                className="w-full px-4 py-2 rounded-md border border-input bg-background"
+                required
               />
             </div>
-          </div>
 
-          {error && (
-            <div className="text-red-500 text-sm text-center bg-red-50 p-2 rounded">
-              {error}
-            </div>
-          )}
+            {error && (
+              <div className="p-4 rounded-md bg-destructive/10 text-destructive text-sm">
+                {error}
+              </div>
+            )}
 
-          <div>
             <button
               type="submit"
               disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 disabled:opacity-50 transition-colors"
+              className="w-full luxury-button text-white py-2 rounded-md transition-all duration-300 disabled:opacity-50"
             >
-              {isLoading ? (
-                <span className="flex items-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Anmeldung...
-                </span>
-              ) : (
-                'Anmelden'
-              )}
+              {isLoading ? 'Anmeldung...' : 'Anmelden'}
             </button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );

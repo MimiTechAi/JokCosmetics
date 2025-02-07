@@ -50,7 +50,6 @@ const ParticleEffect = () => {
           transition={{
             duration: Math.random() * 4 + 2,
             repeat: Infinity,
-            repeatType: "mirror",
             delay: Math.random() * 2,
             ease: "easeInOut"
           }}
@@ -73,7 +72,8 @@ export function Hero() {
             className="object-cover object-[50%_30%]"
             priority
             quality={100}
-            sizes="100vw"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 100vw, 100vw"
+            loading="eager"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/95 via-black/80 to-black/95" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-transparent via-black/70 to-black/90" />
@@ -96,10 +96,7 @@ export function Hero() {
             className="relative text-6xl md:text-8xl lg:text-9xl font-bold mb-8 md:mb-12 font-serif tracking-tight"
           >
             <span className="block relative pt-4">
-              <span className="relative inline-block bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent bg-[length:200%_100%] animate-gradient drop-shadow-sm">
-                JOK Cosmetics
-              </span>
-              <span className="absolute left-0 right-0 bottom-[-0.1em] bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent transform-gpu overflow-hidden origin-bottom animate-mirror select-none">
+              <span className="relative inline-block bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent bg-[length:200%_100%] animate-gradient">
                 JOK Cosmetics
               </span>
             </span>

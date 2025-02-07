@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="circuit" x="0" y="0" width="50" height="50" patternUnits="userSpaceOnUse">
+      <!-- Circuit lines -->
+      <path d="M10 10 h30 v30 h-30 z" fill="none" stroke="currentColor" stroke-width="1"/>
+      <circle cx="10" cy="10" r="2" fill="currentColor"/>
+      <circle cx="40" cy="40" r="2" fill="currentColor"/>
+      <!-- Additional circuit elements -->
+      <path d="M25 10 v15 h15" fill="none" stroke="currentColor" stroke-width="1"/>
+      <circle cx="40" cy="25" r="2" fill="currentColor"/>
+    </pattern>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#circuit)"/>
+</svg>

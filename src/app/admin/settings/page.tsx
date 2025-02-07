@@ -1,46 +1,90 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { createClient } from '@/utils/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { useRouter } from 'next/navigation';
 import { toast } from '@/components/ui/use-toast';
 
 interface Settings {
-  id?: string;
-  businessHours: {
-    start: string;
-    end: string;
-  };
-  breakTime: {
-    start: string;
-    duration: number;
-  };
+  id: string;
+  site_name: string;
+  contact_email: string;
+  contact_phone: string;
+  business_hours: string;
+  maintenance_mode: boolean;
+  instagram_url?: string;
+  facebook_url?: string;
 }
 
 const defaultSettings: Settings = {
-  businessHours: {
-    start: '09:00',
-    end: '18:00'
-  },
-  breakTime: {
-    start: '12:00',
-    duration: 60
-  }
+  id: '',
+  site_name: 'JOK Cosmetics',
+  contact_email: '',
+  contact_phone: '',
+  business_hours: '',
+  maintenance_mode: false,
+  instagram_url: '',
+  facebook_url: '',
 };
 
-export default function AdminSettings() {
-  const [loading, setLoading] = useState(true);
+export default function SettingsPage() {
   const [settings, setSettings] = useState<Settings>(defaultSettings);
-  const supabase = createClientComponentClient();
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const supabase = createClient();
+  const router = useRouter();
 
   useEffect(() => {
-    loadSettings();
+    checkAuthAndLoadSettings();
   }, []);
+
+  const checkAuthAndLoadSettings = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        router.push('/auth/login');
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', session.user.id)
+        .single();
+
+      if (!profile?.role || profile.role !== 'admin') {
+        router.push('/auth/login');
+        return;
+      }
+
+      await loadSettings();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Fehler bei der Authentifizierung';
+      console.error('Auth error:', error);
+      setError(message);
+      toast({
+        title: 'Fehler',
+        description: message,
+        variant: 'destructive',
+      });
+      router.push('/auth/login');
+    }
+  };
 
   const loadSettings = async () => {
     try {
+      setIsLoading(true);
+      setError(null);
+
       const { data, error } = await supabase
         .from('settings')
         .select('*')
@@ -48,152 +92,165 @@ export default function AdminSettings() {
 
       if (error) {
         if (error.code === 'PGRST116') {
-          // Keine Einstellungen gefunden, verwende Standardeinstellungen
-          await saveSettings(defaultSettings);
+          // No settings found, create default settings
+          const { error: insertError } = await supabase
+            .from('settings')
+            .insert([defaultSettings]);
+
+          if (insertError) throw insertError;
+
+          setSettings(defaultSettings);
         } else {
           throw error;
         }
-      }
-
-      if (data) {
-        setSettings({
-          ...defaultSettings,
-          ...data,
-        });
+      } else {
+        setSettings(data || defaultSettings);
       }
     } catch (error) {
-      console.error('Fehler beim Laden der Einstellungen:', error);
+      const message = error instanceof Error ? error.message : 'Fehler beim Laden der Einstellungen';
+      console.error('Settings error:', error);
+      setError(message);
       toast({
         title: 'Fehler',
-        description: 'Die Einstellungen konnten nicht geladen werden.',
-        variant: 'destructive'
+        description: message,
+        variant: 'destructive',
       });
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  const saveSettings = async (settingsToSave: Settings = settings) => {
-    setLoading(true);
+  const handleSave = async () => {
     try {
+      setIsSaving(true);
+      setError(null);
+
       const { error } = await supabase
         .from('settings')
-        .upsert(settingsToSave);
+        .upsert([settings], {
+          onConflict: 'id',
+        });
 
       if (error) throw error;
 
       toast({
         title: 'Erfolg',
-        description: 'Die Einstellungen wurden gespeichert.',
+        description: 'Einstellungen wurden gespeichert',
       });
     } catch (error) {
-      console.error('Fehler beim Speichern der Einstellungen:', error);
+      const message = error instanceof Error ? error.message : 'Fehler beim Speichern der Einstellungen';
+      console.error('Save error:', error);
+      setError(message);
       toast({
         title: 'Fehler',
-        description: 'Die Einstellungen konnten nicht gespeichert werden.',
-        variant: 'destructive'
+        description: message,
+        variant: 'destructive',
       });
     } finally {
-      setLoading(false);
+      setIsSaving(false);
     }
   };
 
-  if (loading) {
+  const handleChange = (field: keyof Settings, value: string | boolean) => {
+    setSettings((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  if (isLoading) {
     return (
-      <div className="container mx-auto p-4">
-        <div className="flex items-center justify-center min-h-[200px]">
-          <div className="text-center">Lade Einstellungen...</div>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Admin Einstellungen</h1>
-        <Button onClick={() => saveSettings()} disabled={loading}>
-          Einstellungen speichern
+    <div className="container mx-auto py-8">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold gradient-text">Einstellungen</h1>
+        <Button 
+          variant="luxury"
+          onClick={handleSave}
+          disabled={isSaving}
+        >
+          {isSaving ? 'Wird gespeichert...' : 'Speichern'}
         </Button>
       </div>
-      
-      <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Geschäftszeiten</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Öffnungszeit</label>
-                <Input
-                  type="time"
-                  value={settings.businessHours.start}
-                  onChange={(e) => setSettings({
-                    ...settings,
-                    businessHours: {
-                      ...settings.businessHours,
-                      start: e.target.value
-                    }
-                  })}
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Schließzeit</label>
-                <Input
-                  type="time"
-                  value={settings.businessHours.end}
-                  onChange={(e) => setSettings({
-                    ...settings,
-                    businessHours: {
-                      ...settings.businessHours,
-                      end: e.target.value
-                    }
-                  })}
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Pausenzeit</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Beginn</label>
-                <Input
-                  type="time"
-                  value={settings.breakTime.start}
-                  onChange={(e) => setSettings({
-                    ...settings,
-                    breakTime: {
-                      ...settings.breakTime,
-                      start: e.target.value
-                    }
-                  })}
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Dauer (Minuten)</label>
-                <Input
-                  type="number"
-                  min="0"
-                  value={settings.breakTime.duration}
-                  onChange={(e) => setSettings({
-                    ...settings,
-                    breakTime: {
-                      ...settings.breakTime,
-                      duration: parseInt(e.target.value) || 0
-                    }
-                  })}
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      {error && (
+        <div className="mb-4 p-4 rounded-md bg-destructive/10 text-destructive">
+          {error}
+        </div>
+      )}
+
+      <div className="luxury-card space-y-8">
+        <div className="grid gap-6">
+          <div className="space-y-2">
+            <Label htmlFor="site_name">Website Name</Label>
+            <Input
+              id="site_name"
+              value={settings.site_name}
+              onChange={(e) => handleChange('site_name', e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="contact_email">Kontakt E-Mail</Label>
+            <Input
+              id="contact_email"
+              type="email"
+              value={settings.contact_email}
+              onChange={(e) => handleChange('contact_email', e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="contact_phone">Kontakt Telefon</Label>
+            <Input
+              id="contact_phone"
+              value={settings.contact_phone}
+              onChange={(e) => handleChange('contact_phone', e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="business_hours">Öffnungszeiten</Label>
+            <Input
+              id="business_hours"
+              value={settings.business_hours}
+              onChange={(e) => handleChange('business_hours', e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="instagram_url">Instagram URL</Label>
+            <Input
+              id="instagram_url"
+              value={settings.instagram_url}
+              onChange={(e) => handleChange('instagram_url', e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="facebook_url">Facebook URL</Label>
+            <Input
+              id="facebook_url"
+              value={settings.facebook_url}
+              onChange={(e) => handleChange('facebook_url', e.target.value)}
+            />
+          </div>
+
+          <div className="flex items-center justify-between space-x-2">
+            <Label htmlFor="maintenance_mode">Wartungsmodus</Label>
+            <Switch
+              id="maintenance_mode"
+              checked={settings.maintenance_mode}
+              onCheckedChange={(checked) => handleChange('maintenance_mode', checked)}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

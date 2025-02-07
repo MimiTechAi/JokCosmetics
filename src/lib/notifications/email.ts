@@ -75,7 +75,7 @@ export async function sendEmailNotification(
   };
 
   const adminEmailData: EmailData = {
-    to: process.env.ADMIN_EMAIL,
+    to: process.env.ADMIN_EMAIL || 'admin@jok-cosmetics.de',
     subject: 'Neue Buchung eingegangen - Jok Cosmetics',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">

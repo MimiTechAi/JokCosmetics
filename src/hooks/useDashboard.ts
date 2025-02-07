@@ -72,7 +72,7 @@ export function useDashboard() {
       ]);
 
       const monthlyRevenue = monthlyBookings?.reduce((sum, booking) => {
-        return sum + (booking.services?.price || 0);
+        return sum + (booking.services?.[0]?.price || 0);
       }, 0) || 0;
 
       setStats({

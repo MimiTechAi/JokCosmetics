@@ -1,53 +1,34 @@
-'use client'
-
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { Navbar } from '@/components/Navbar'
 import { Toaster } from '@/components/ui/toaster'
 import { Providers } from './providers'
-import { useEffect, useState } from 'react'
-import Link from 'next/link'
+import { cn } from '@/lib/utils'
+import { Metadata } from 'next'
+import Footer from '@/components/Footer'
 
 const inter = Inter({ subsets: ['latin'] })
 
-function RootLayoutContent({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  const [showAdmin, setShowAdmin] = useState(false)
-
-  useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.key.toLowerCase() === 'j') {
-        setShowAdmin(true)
-        setTimeout(() => setShowAdmin(false), 2000) // Verstecke nach 2 Sekunden
-      }
-    }
-
-    window.addEventListener('keypress', handleKeyPress)
-    return () => window.removeEventListener('keypress', handleKeyPress)
-  }, [])
-
-  return (
-    <div className="w-screen overflow-x-hidden">
-      <Navbar />
-      {children}
-      <Toaster />
-      {showAdmin && (
-        <Link 
-          href="/admin"
-          className="fixed bottom-4 right-4 bg-transparent"
-          onClick={(e) => {
-            e.preventDefault()
-            window.location.href = '/admin'
-          }}
-        >
-          <button className="w-4 h-4" />
-        </Link>
-      )}
-    </div>
-  )
+export const metadata: Metadata = {
+  title: 'JOK Cosmetics - Ihr professionelles Beauty Studio',
+  description: 'JOK Cosmetics - Ihr professionelles Beauty Studio für Permanent Make-up, Wimpern und Gesichtsbehandlungen in höchster Qualität.',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#000000' }
+  ],
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
+  },
+  robots: {
+    index: true,
+    follow: true
+  },
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    viewportFit: 'cover',
+  }
 }
 
 export default function RootLayout({
@@ -56,10 +37,15 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="de">
-      <body className={`${inter.className} overflow-x-hidden`}>
+    <html lang="de" suppressHydrationWarning>
+      <body className={cn(inter.className, 'min-h-screen')}>
         <Providers>
-          <RootLayoutContent>{children}</RootLayoutContent>
+          <div className="w-screen overflow-x-hidden">
+            <Navbar />
+            <main>{children}</main>
+            <Footer />
+            <Toaster />
+          </div>
         </Providers>
       </body>
     </html>

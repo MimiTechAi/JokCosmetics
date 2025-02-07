@@ -14,6 +14,7 @@ import {
   Scissors,
   Clock
 } from 'lucide-react';
+import { LogoutButton } from '@/components/LogoutButton';
 
 const menuItems = [
   {
@@ -117,6 +118,7 @@ export default function AdminLayout({
           </nav>
 
           <div className="p-6 border-t">
+            <LogoutButton />
             <p className="text-sm text-gray-500">
               {new Date().getFullYear()} JOK Cosmetics
             </p>

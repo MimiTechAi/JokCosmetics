@@ -105,7 +105,7 @@ const staticServices: Service[] = [
     description: 'Sanft schattierte Augenbrauen für einen natürlichen, pudrigen Look. Ideal für einen weichen, definierten Augenbraueneffekt.',
     duration: '120-180 Min',
     price: '399€',
-    image: '/images/WhatsApp Image 2025-01-09 at 22.31.21.jpeg',
+    image_url: '/images/WhatsApp Image 2025-01-09 at 22.31.21.jpeg',
     benefits: [
       'Natürlicher, pudrig-weicher Look',
       'Langanhaltende Ergebnisse (2-4 Jahre)',
@@ -119,9 +119,12 @@ const staticServices: Service[] = [
     ],
     techniques: [
       'Digital Powder Technique',
-      'Ombre Shading',
-      'Hybrid Brows'
-    ]
+      'Ombre-Effekt',
+      'Hybrid-Technik'
+    ],
+    is_active: true,
+    sort_order: 1,
+    slug: 'powder-brows'
   },
   // ... other static services
 ];

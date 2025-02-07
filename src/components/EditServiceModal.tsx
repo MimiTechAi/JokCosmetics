@@ -20,7 +20,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
 
 const serviceSchema = z.object({
   id: z.string().optional(),
@@ -29,28 +28,32 @@ const serviceSchema = z.object({
   duration: z.coerce.number().min(1, 'Dauer muss mindestens 1 Minute sein'),
   price: z.coerce.number().min(0, 'Preis muss positiv sein'),
   category: z.string().optional(),
-  is_active: z.boolean().default(true),
 });
 
 type ServiceFormData = z.infer<typeof serviceSchema>;
 
 interface EditServiceModalProps {
+  isOpen: boolean;
   service: Service | null;
   onClose: () => void;
-  onSave: (service: ServiceFormData) => void;
+  onSave: (service: ServiceFormData) => Promise<void>;
 }
 
-export default function EditServiceModal({ service, onClose, onSave }: EditServiceModalProps) {
+export default function EditServiceModal({ 
+  isOpen,
+  service, 
+  onClose, 
+  onSave 
+}: EditServiceModalProps) {
   const form = useForm<ServiceFormData>({
     resolver: zodResolver(serviceSchema),
     defaultValues: {
       id: '',
       name: '',
       description: '',
-      duration: 0,
+      duration: 60,
       price: 0,
       category: '',
-      is_active: true,
     },
   });
 
@@ -60,21 +63,34 @@ export default function EditServiceModal({ service, onClose, onSave }: EditServi
         id: service.id,
         name: service.name,
         description: service.description || '',
-        duration: Number(service.duration),
-        price: Number(service.price),
+        duration: service.duration,
+        price: service.price,
         category: service.category || '',
-        is_active: service.is_active,
+      });
+    } else {
+      form.reset({
+        id: undefined,
+        name: '',
+        description: '',
+        duration: 60,
+        price: 0,
+        category: '',
       });
     }
   }, [service, form]);
 
-  const onSubmit = (data: ServiceFormData) => {
-    onSave(data);
+  const onSubmit = async (data: ServiceFormData) => {
+    try {
+      await onSave(data);
+      form.reset();
+    } catch (error) {
+      console.error('Form submission error:', error);
+    }
   };
 
   return (
-    <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>
             {service ? 'Service bearbeiten' : 'Neuer Service'}
@@ -82,7 +98,7 @@ export default function EditServiceModal({ service, onClose, onSave }: EditServi
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
               name="name"
@@ -104,21 +120,10 @@ export default function EditServiceModal({ service, onClose, onSave }: EditServi
                 <FormItem>
                   <FormLabel>Beschreibung</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Beschreibung des Services" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="category"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Kategorie</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Kategorie" {...field} />
+                    <Textarea
+                      placeholder="Beschreibung des Services"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -131,9 +136,14 @@ export default function EditServiceModal({ service, onClose, onSave }: EditServi
                 name="duration"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Dauer (Min)</FormLabel>
+                    <FormLabel>Dauer (Minuten)</FormLabel>
                     <FormControl>
-                      <Input type="number" min="1" {...field} />
+                      <Input
+                        type="number"
+                        min="1"
+                        placeholder="60"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -147,7 +157,13 @@ export default function EditServiceModal({ service, onClose, onSave }: EditServi
                   <FormItem>
                     <FormLabel>Preis (€)</FormLabel>
                     <FormControl>
-                      <Input type="number" min="0" step="0.01" {...field} />
+                      <Input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="0.00"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -157,28 +173,31 @@ export default function EditServiceModal({ service, onClose, onSave }: EditServi
 
             <FormField
               control={form.control}
-              name="is_active"
+              name="category"
               render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base">Aktiv</FormLabel>
-                  </div>
+                <FormItem>
+                  <FormLabel>Kategorie</FormLabel>
                   <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
+                    <Input placeholder="Service Kategorie" {...field} />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
 
-            <div className="flex justify-end space-x-4 pt-4">
-              <Button variant="outline" onClick={onClose}>
+            <div className="flex justify-end space-x-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+              >
                 Abbrechen
               </Button>
-              <Button type="submit">
-                {service ? 'Speichern' : 'Erstellen'}
+              <Button
+                type="submit"
+                variant="luxury"
+              >
+                {service ? 'Aktualisieren' : 'Erstellen'}
               </Button>
             </div>
           </form>

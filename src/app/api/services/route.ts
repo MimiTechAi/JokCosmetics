@@ -26,7 +26,7 @@ export async function GET() {
 
     // Gruppiere Services nach Kategorien
     const groupedServices = services.reduce((acc: { [key: string]: any[] }, service) => {
-      const category = service.category || 'Andere';
+      const category = service.category_id || 'other';
       if (!acc[category]) {
         acc[category] = [];
       }

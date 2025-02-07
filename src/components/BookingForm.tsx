@@ -1,436 +1,446 @@
 'use client';
 
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { format, addDays, parseISO } from 'date-fns';
+import { createClient } from '@/utils/supabase/client';
+import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
-import { supabase } from '@/lib/supabase/client';
-import type { Database } from '@/types/database';
+import { motion, AnimatePresence } from 'framer-motion';
 
-type Service = Database['public']['Tables']['services']['Row'];
+interface ServiceCategory {
+  id: string;
+  name: string;
+}
 
-interface FormData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  notes: string;
+interface Service {
+  id: string;
+  title: string;
+  description: string;
+  duration: string;
+  price: number;
+  category_id: string;
+  service_categories: ServiceCategory | null;
 }
 
 interface BookingFormProps {
   services: Service[];
-  initialServiceId?: string;
 }
 
-interface BookingDetails {
-  serviceName: string;
-  date: string;
-  time: string;
-}
+const timeSlots = [
+  '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
+  '12:00', '12:30', '13:00', '13:30', '14:00', '14:30',
+  '15:00', '15:30', '16:00', '16:30', '17:00', '17:30'
+];
 
-const SuccessMessage = ({ onClose, bookingDetails }: { 
-  onClose: () => void,
-  bookingDetails: BookingDetails;
-}) => (
-  <motion.div 
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    exit={{ opacity: 0 }}
-    className="fixed inset-0 flex items-center justify-center z-50"
-  >
-    <div className="fixed inset-0 bg-black bg-opacity-30" onClick={onClose}></div>
-    <div className="bg-white p-8 rounded-lg shadow-xl max-w-md w-full mx-4 relative z-10">
-      <div className="text-center">
-        <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
-          <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-          </svg>
-        </div>
-        <h3 className="mt-4 text-lg font-medium text-gray-900">Buchung erfolgreich!</h3>
-        <div className="mt-4 text-sm text-gray-600">
-          <p className="font-medium">Ihre Buchungsdetails:</p>
-          <p className="mt-2">Behandlung: {bookingDetails.serviceName}</p>
-          <p>Datum: {bookingDetails.date}</p>
-          <p>Uhrzeit: {bookingDetails.time}</p>
-        </div>
-        <p className="mt-4 text-sm text-gray-500">
-          Eine Bestätigungsemail wurde an Ihre E-Mail-Adresse gesendet.
-        </p>
-        <div className="mt-6">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 bg-pink-600 text-white rounded hover:bg-pink-700 transition-colors"
-          >
-            Schließen
-          </button>
-        </div>
-      </div>
-    </div>
-  </motion.div>
-);
-
-export const BookingForm = ({ services, initialServiceId }: BookingFormProps) => {
-  console.log('BookingForm rendered with:', { services, initialServiceId });
-
-  const [step, setStep] = useState(initialServiceId ? 2 : 1);
-  const [selectedService, setSelectedService] = useState<string>(initialServiceId || '');
-  const [selectedDate, setSelectedDate] = useState<string>('');
-  const [selectedTime, setSelectedTime] = useState<string>('');
-  const [formData, setFormData] = useState<FormData>({
-    firstName: '',
-    lastName: '',
+export function BookingForm({ services }: BookingFormProps) {
+  const [step, setStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    service_id: '',
+    date: '',
+    time: '',
+    first_name: '',
+    last_name: '',
     email: '',
     phone: '',
-    notes: '',
+    notes: ''
   });
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-  const [bookingDetails, setBookingDetails] = useState<BookingDetails | null>(null);
+  const supabase = createClient();
 
-  console.log('BookingForm rendered with services:', services?.length);
+  // Gruppiere Services nach Kategorien
+  const servicesByCategory = services.reduce((acc, service) => {
+    const categoryName = service.service_categories?.name || 'Andere';
+    if (!acc[categoryName]) {
+      acc[categoryName] = [];
+    }
+    acc[categoryName].push(service);
+    return acc;
+  }, {} as Record<string, Service[]>);
 
-  const handleServiceSelect = (serviceId: string) => {
-    console.log('Selected service:', serviceId);
-    setSelectedService(serviceId);
-    setStep(2);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleDateSelect = (date: string) => {
-    setSelectedDate(date);
-    setStep(3);
+  const nextStep = () => {
+    setStep(prev => prev + 1);
   };
 
-  const handleTimeSelect = (time: string) => {
-    setSelectedTime(time);
-    setStep(4);
+  const prevStep = () => {
+    setStep(prev => prev - 1);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    if (step !== 4) {
+      nextStep();
+      return;
+    }
+
+    setIsSubmitting(true);
     setError(null);
 
     try {
-      const selectedServiceData = services.find(s => s.id === selectedService);
-      console.log('Selected service:', selectedServiceData);
-      
-      if (!selectedServiceData) {
-        throw new Error('Selected service not found');
+      console.log('Submitting form data:', formData);
+
+      // 1. Erstelle die Buchung
+      const bookingData = {
+        booking_date: formData.date,
+        booking_time: formData.time,
+        service_id: formData.service_id,
+        email: formData.email,
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        phone: formData.phone,
+        notes: formData.notes || '',
+        status: 'pending'
+      };
+
+      console.log('Attempting to create booking with:', bookingData);
+
+      const { error: bookingError } = await supabase
+        .from('bookings')
+        .insert(bookingData);
+
+      if (bookingError) {
+        console.error('Booking error:', bookingError);
+        throw bookingError;
       }
 
-      const booking = {
-        service_id: selectedService,
-        booking_date: selectedDate,
-        booking_time: selectedTime,
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        email: formData.email,
+      // 2. Sende Bestätigungs-E-Mails
+      const selectedService = services.find(s => s.id === formData.service_id);
+      
+      const emailData = {
+        customerEmail: formData.email,
+        customerName: `${formData.first_name} ${formData.last_name}`,
+        bookingDate: formData.date,
+        bookingTime: formData.time,
+        serviceName: selectedService?.title || '',
+        servicePrice: selectedService?.price || 0,
+        serviceDuration: selectedService?.duration || '',
         phone: formData.phone,
         notes: formData.notes || ''
       };
 
-      console.log('Attempting to create booking:', booking);
-
-      const { data, error: bookingError } = await supabase
-        .from('bookings')
-        .insert([booking])
-        .select('*');
-
-      console.log('Booking response:', { data, error: bookingError });
-
-      if (bookingError) {
-        console.error('Detailed booking error:', JSON.stringify(bookingError, null, 2));
-        throw bookingError;
-      }
-
-      // Send confirmation emails
-      const emailResponse = await fetch('/api/send-booking-confirmation', {
+      const response = await fetch('/api/send-booking-confirmation', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          booking,
-          service: selectedServiceData
-        }),
+        body: JSON.stringify(emailData),
       });
 
-      if (!emailResponse.ok) {
-        console.error('Failed to send confirmation emails');
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Failed to send confirmation email:', errorData);
+        // Wir werfen hier keinen Fehler, da die Buchung bereits erfolgreich war
       }
 
-      setSuccess(true);
-      setBookingDetails({
-        serviceName: selectedServiceData.title,
-        date: format(parseISO(selectedDate), 'd. MMMM yyyy', { locale: de }),
-        time: selectedTime
-      });
-    } catch (err) {
-      console.error('Full error object:', JSON.stringify(err, null, 2));
-      setError('Ein Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.');
-      throw err;
+      // Erfolgsmeldung
+      setStep(5);
+    } catch (error: any) {
+      console.error('Full error object:', error);
+      setError(
+        error.message || 
+        'Es gab einen Fehler bei der Buchung. Bitte versuchen Sie es später erneut.'
+      );
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
+    }
+  };
+
+  const renderStepContent = () => {
+    switch (step) {
+      case 1:
+        return (
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="space-y-6"
+          >
+            <h2 className="text-2xl font-semibold mb-6">Wählen Sie Ihre Behandlung</h2>
+            <div className="space-y-8">
+              {Object.entries(servicesByCategory).map(([category, categoryServices]) => (
+                <div key={category} className="space-y-4">
+                  <h3 className="text-xl font-medium text-pink-600">{category}</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {categoryServices.map((service) => (
+                      <motion.div
+                        key={service.id}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className={`p-4 rounded-lg border cursor-pointer transition-all ${
+                          formData.service_id === service.id
+                            ? 'border-pink-600 bg-pink-50 shadow-lg'
+                            : 'border-gray-200 hover:border-pink-300 hover:shadow'
+                        }`}
+                        onClick={() => {
+                          setFormData(prev => ({ ...prev, service_id: service.id }));
+                          nextStep();
+                        }}
+                      >
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h4 className="font-medium">{service.title}</h4>
+                            {service.description && (
+                              <p className="text-sm text-gray-600 mt-1">{service.description}</p>
+                            )}
+                            <div className="flex items-center gap-2 mt-2">
+                              <span className="text-sm text-gray-600">
+                                {service.duration} Min
+                              </span>
+                            </div>
+                          </div>
+                          <span className="font-medium text-pink-600">{service.price}€</span>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        );
+
+      case 2:
+        return (
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="space-y-6"
+          >
+            <h2 className="text-2xl font-semibold mb-6">Wählen Sie ein Datum</h2>
+            <div className="max-w-md mx-auto">
+              <input
+                type="date"
+                name="date"
+                value={formData.date}
+                onChange={handleChange}
+                min={format(new Date(), 'yyyy-MM-dd')}
+                max={format(new Date(2025, 11, 31), 'yyyy-MM-dd')}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                required
+                title="Wählen Sie ein Datum"
+                placeholder="Wählen Sie ein Datum"
+              />
+            </div>
+            <div className="flex justify-between mt-8">
+              <button
+                type="button"
+                onClick={prevStep}
+                className="text-pink-600 hover:text-pink-700"
+              >
+                ← Zurück
+              </button>
+              <button
+                type="button"
+                onClick={nextStep}
+                disabled={!formData.date}
+                className="px-6 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 disabled:opacity-50"
+              >
+                Weiter →
+              </button>
+            </div>
+          </motion.div>
+        );
+
+      case 3:
+        return (
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="space-y-6"
+          >
+            <h2 className="text-2xl font-semibold mb-6">Wählen Sie eine Uhrzeit</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              {timeSlots.map((time) => (
+                <motion.button
+                  key={time}
+                  type="button"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => {
+                    setFormData(prev => ({ ...prev, time }));
+                    nextStep();
+                  }}
+                  className={`p-3 rounded-lg border text-center transition-all ${
+                    formData.time === time
+                      ? 'border-pink-600 bg-pink-50 text-pink-600'
+                      : 'border-gray-200 hover:border-pink-300'
+                  }`}
+                >
+                  {time} Uhr
+                </motion.button>
+              ))}
+            </div>
+            <div className="flex justify-between mt-8">
+              <button
+                type="button"
+                onClick={prevStep}
+                className="text-pink-600 hover:text-pink-700"
+              >
+                ← Zurück
+              </button>
+            </div>
+          </motion.div>
+        );
+
+      case 4:
+        return (
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="space-y-6"
+          >
+            <h2 className="text-2xl font-semibold mb-6">Ihre Kontaktdaten</h2>
+            <div className="grid gap-6 md:grid-cols-2">
+              <div>
+                <label className="block text-sm font-medium mb-2">Vorname</label>
+                <input
+                  type="text"
+                  name="first_name"
+                  value={formData.first_name}
+                  onChange={handleChange}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                  required
+                  minLength={2}
+                  title="Ihr Vorname"
+                  placeholder="Vorname eingeben"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Nachname</label>
+                <input
+                  type="text"
+                  name="last_name"
+                  value={formData.last_name}
+                  onChange={handleChange}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                  required
+                  minLength={2}
+                  title="Ihr Nachname"
+                  placeholder="Nachname eingeben"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">E-Mail</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                  required
+                  title="Ihre E-Mail-Adresse"
+                  placeholder="E-Mail eingeben"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Telefon</label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                  required
+                  minLength={6}
+                  title="Ihre Telefonnummer"
+                  placeholder="Telefonnummer eingeben"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Anmerkungen</label>
+              <textarea
+                name="notes"
+                value={formData.notes}
+                onChange={handleChange}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                rows={3}
+                title="Zusätzliche Anmerkungen"
+                placeholder="Optionale Anmerkungen zur Buchung"
+              />
+            </div>
+
+            <div className="flex justify-between mt-8">
+              <button
+                type="button"
+                onClick={prevStep}
+                className="text-pink-600 hover:text-pink-700"
+              >
+                ← Zurück
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="px-6 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 disabled:opacity-50"
+              >
+                {isSubmitting ? 'Wird gesendet...' : 'Termin buchen'}
+              </button>
+            </div>
+          </motion.div>
+        );
+
+      case 5:
+        return (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center py-8"
+          >
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Buchung erfolgreich!</h2>
+            <p className="text-gray-600 mb-8">
+              Vielen Dank für Ihre Buchung. Sie erhalten in Kürze eine Bestätigung per E-Mail.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setStep(1);
+                setFormData({
+                  service_id: '',
+                  date: '',
+                  time: '',
+                  first_name: '',
+                  last_name: '',
+                  email: '',
+                  phone: '',
+                  notes: ''
+                });
+              }}
+              className="text-pink-600 hover:text-pink-700"
+            >
+              Neue Buchung erstellen
+            </button>
+          </motion.div>
+        );
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
       <AnimatePresence mode="wait">
-        {step === 1 && (
-          <motion.div
-            key="step1"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="space-y-6"
-          >
-            <h2 className="text-2xl font-semibold text-gray-900">
-              Wählen Sie Ihre Behandlung
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {services && services.length > 0 ? (
-                services.map((service) => (
-                  <motion.div
-                    key={service.id}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className={`p-4 rounded-lg border cursor-pointer transition-all ${
-                      selectedService === service.id
-                        ? 'border-pink-600 bg-pink-50 shadow-lg'
-                        : 'border-gray-200 hover:border-pink-300 hover:shadow'
-                    }`}
-                    onClick={() => handleServiceSelect(service.id)}
-                  >
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <h3 className="font-medium text-gray-900">{service.title}</h3>
-                        <p className="text-sm text-gray-500 mt-1">{service.description}</p>
-                        <div className="flex items-center gap-4 mt-2">
-                          <span className="text-sm text-gray-600 flex items-center">
-                            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            {service.duration}
-                          </span>
-                        </div>
-                      </div>
-                      <span className="font-medium text-pink-600 whitespace-nowrap ml-4">{service.price}</span>
-                    </div>
-                  </motion.div>
-                ))
-              ) : (
-                <div className="col-span-2 text-center py-8">
-                  <p className="text-gray-500">Keine Dienstleistungen verfügbar.</p>
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-
-        {step === 2 && (
-          <motion.div
-            key="step2"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="space-y-6"
-          >
-            <h2 className="text-2xl font-semibold text-gray-900">
-              Wählen Sie ein Datum
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[...Array(14)].map((_, i) => {
-                const date = addDays(new Date(), i + 1);
-                return (
-                  <motion.button
-                    key={i}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => handleDateSelect(date.toISOString().split('T')[0])}
-                    className="p-4 bg-white rounded-lg shadow hover:shadow-lg transition-shadow text-center"
-                  >
-                    <div className="font-medium">
-                      {format(date, 'EEEE', { locale: de })}
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      {format(date, 'd. MMMM', { locale: de })}
-                    </div>
-                  </motion.button>
-                );
-              })}
-            </div>
-          </motion.div>
-        )}
-
-        {step === 3 && (
-          <motion.div
-            key="step3"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="space-y-6"
-          >
-            <h2 className="text-2xl font-semibold text-gray-900">
-              Wählen Sie eine Uhrzeit
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'].map((time) => (
-                <motion.button
-                  key={time}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => handleTimeSelect(time)}
-                  className="p-4 bg-white rounded-lg shadow hover:shadow-lg transition-shadow text-center"
-                >
-                  {time}
-                </motion.button>
-              ))}
-            </div>
-          </motion.div>
-        )}
-
-        {step === 4 && (
-          <motion.div
-            key="step4"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="space-y-6"
-          >
-            <h2 className="text-2xl font-semibold text-gray-900">
-              Ihre Kontaktdaten
-            </h2>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Vorname
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
-                    value={formData.firstName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, firstName: e.target.value })
-                    }
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Nachname
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
-                    value={formData.lastName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, lastName: e.target.value })
-                    }
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  E-Mail
-                </label>
-                <input
-                  type="email"
-                  required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Telefon
-                </label>
-                <input
-                  type="tel"
-                  required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
-                  value={formData.phone}
-                  onChange={(e) =>
-                    setFormData({ ...formData, phone: e.target.value })
-                  }
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Anmerkungen
-                </label>
-                <textarea
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
-                  rows={3}
-                  value={formData.notes}
-                  onChange={(e) =>
-                    setFormData({ ...formData, notes: e.target.value })
-                  }
-                />
-              </div>
-
-              {error && (
-                <div className="text-red-600 text-sm">{error}</div>
-              )}
-
-              <div className="flex justify-end">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className={`px-6 py-3 bg-pink-600 text-white rounded-lg shadow hover:bg-pink-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-pink-500 ${
-                    loading ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
-                >
-                  {loading ? 'Wird gesendet...' : 'Termin buchen'}
-                </button>
-              </div>
-            </form>
-          </motion.div>
-        )}
+        {renderStepContent()}
       </AnimatePresence>
 
-      {step > 1 && (
-        <motion.button
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="mt-6 text-pink-600 hover:text-pink-700"
-          onClick={() => setStep(step - 1)}
-        >
-          ← Zurück
-        </motion.button>
+      {error && (
+        <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+          {error}
+        </div>
       )}
-
-      <AnimatePresence>
-        {success && bookingDetails && (
-          <SuccessMessage
-            onClose={() => {
-              setSuccess(false);
-              setBookingDetails(null);
-              setStep(1);
-              setSelectedService('');
-              setSelectedDate('');
-              setSelectedTime('');
-              setFormData({
-                firstName: '',
-                lastName: '',
-                email: '',
-                phone: '',
-                notes: '',
-              });
-            }}
-            bookingDetails={bookingDetails}
-          />
-        )}
-      </AnimatePresence>
-    </div>
+    </form>
   );
-};
+}
