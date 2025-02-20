@@ -18,21 +18,45 @@ import { toast } from '@/components/ui/use-toast';
 
 interface Booking {
   id: string;
+  customer_id: string;
   customer: {
     first_name: string;
     last_name: string;
     email: string;
     phone: string;
   };
+  service_id: string;
   service: {
     name: string;
     duration: number;
     price: number;
   };
-  date: string;
-  time: string;
+  booking_date: string;
+  booking_time: string;
   status: 'pending' | 'confirmed' | 'cancelled';
   notes?: string;
+}
+
+interface SupabaseBooking {
+  id: string;
+  booking_date: string;
+  booking_time: string;
+  status: 'pending' | 'confirmed' | 'cancelled';
+  notes?: string;
+  profile_id: string;
+  profiles: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+    phone: string;
+  } | null;
+  services: {
+    id: string;
+    name: string;
+    duration: number;
+    price: number;
+  } | null;
 }
 
 export default function BookingsPage() {
@@ -92,28 +116,57 @@ export default function BookingsPage() {
         .from('bookings')
         .select(`
           id,
-          date,
-          time,
+          booking_date,
+          booking_time,
           status,
           notes,
-          customer:profiles (
+          profile_id,
+          profiles (
+            id,
             first_name,
             last_name,
             email,
             phone
           ),
-          service:services (
+          services (
+            id,
             name,
             duration,
             price
           )
         `)
-        .order('date', { ascending: false })
-        .order('time', { ascending: true });
+        .order('booking_date', { ascending: false })
+        .order('booking_time', { ascending: true });
 
       if (error) throw error;
 
-      setBookings(data || []);
+      if (!data) {
+        setBookings([]);
+        return;
+      }
+
+      const formattedData = data.map((booking: any) => ({
+        id: booking.id,
+        booking_date: booking.booking_date,
+        booking_time: booking.booking_time,
+        status: booking.status as 'pending' | 'confirmed' | 'cancelled',
+        notes: booking.notes,
+        customer_id: booking.profile_id,
+        customer: {
+          first_name: booking.profiles?.first_name ?? '',
+          last_name: booking.profiles?.last_name ?? '',
+          email: booking.profiles?.email ?? '',
+          phone: booking.profiles?.phone ?? ''
+        },
+        service_id: booking.services?.id ?? '',
+        service: {
+          name: booking.services?.name ?? '',
+          duration: booking.services?.duration ?? 0,
+          price: booking.services?.price ?? 0
+        }
+      })) as Booking[];
+      
+      setBookings(formattedData);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Fehler beim Laden der Buchungen';
       console.error('Bookings error:', error);
@@ -192,9 +245,9 @@ export default function BookingsPage() {
             {bookings.map((booking) => (
               <TableRow key={booking.id}>
                 <TableCell>
-                  {format(new Date(booking.date), 'dd.MM.yyyy', { locale: de })}
+                  {format(new Date(booking.booking_date), 'dd.MM.yyyy', { locale: de })}
                 </TableCell>
-                <TableCell>{booking.time}</TableCell>
+                <TableCell>{booking.booking_time}</TableCell>
                 <TableCell>
                   <div>
                     {booking.customer.first_name} {booking.customer.last_name}

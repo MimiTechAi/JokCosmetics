@@ -117,6 +117,8 @@ export function Navbar() {
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="md:hidden p-2 rounded-lg text-white hover:bg-white/10 transition-colors"
+            aria-label="Toggle navigation menu"
+            title="Toggle menu"
           >
             <svg
               className="h-6 w-6"

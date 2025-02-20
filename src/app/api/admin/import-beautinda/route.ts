@@ -99,13 +99,24 @@ export async function GET() {
 
   } catch (error) {
     console.error('Import-Fehler:', error);
-    return NextResponse.json(
-      { 
-        success: false, 
-        message: 'Fehler beim Importieren der Daten',
-        error: error.message 
-      },
-      { status: 500 }
-    );
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          message: 'Fehler beim Importieren der Daten',
+          error: error.message // Safe to access message
+        },
+        { status: 500 }
+      );
+    } else {
+      return NextResponse.json(
+        { 
+          success: false, 
+          message: 'Fehler beim Importieren der Daten',
+          error: 'Ein unbekannter Fehler ist aufgetreten.' // Fallback for unknown errors
+        },
+        { status: 500 }
+      );
+    }
   }
 }

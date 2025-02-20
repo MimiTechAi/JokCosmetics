@@ -57,6 +57,7 @@
   "devDependencies": {
     "@playwright/test": "^1.50.1",
     "@shadcn/ui": "^0.0.4",
+    "@types/jest-when": "^3.5.5",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
@@ -67,6 +68,7 @@
     "dotenv": "^16.3.1",
     "eslint": "^8.56.0",
     "eslint-config-next": "14.0.4",
+    "jest-when": "^3.7.0",
     "postcss": "^8.5.1",
     "postcss-preset-env": "^10.1.3",
     "stylelint": "^16.3.1",

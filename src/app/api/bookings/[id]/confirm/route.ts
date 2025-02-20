@@ -3,18 +3,17 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
-export const revalidate = 0;
 
 export async function POST(
-  req: NextRequest,
-  context: { params: { id: string } }
-) {
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+): Promise<NextResponse> {
   try {
-    const { id } = context.params;
+    const { id } = await params;
     
     if (!id) {
       return NextResponse.json(
-        { error: 'Ungültige Buchungs-ID' },
+        { error: 'Missing booking ID' },
         { status: 400 }
       );
     }
@@ -24,7 +23,7 @@ export async function POST(
 
     if (!session?.user) {
       return NextResponse.json(
-        { error: 'Nicht autorisiert' },
+        { error: 'Unauthorized' },
         { status: 401 }
       );
     }
@@ -37,7 +36,7 @@ export async function POST(
 
     if (bookingError || !booking) {
       return NextResponse.json(
-        { error: 'Buchung nicht gefunden' },
+        { error: 'Booking not found' },
         { status: 404 }
       );
     }
@@ -49,16 +48,19 @@ export async function POST(
 
     if (updateError) {
       return NextResponse.json(
-        { error: 'Fehler beim Bestätigen der Buchung' },
+        { error: 'Confirmation failed' },
         { status: 500 }
       );
     }
 
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Error in booking confirmation:', error);
     return NextResponse.json(
-      { error: 'Interner Server-Fehler' },
+      { success: true, booking },
+      { status: 200 }
+    );
+    
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }

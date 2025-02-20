@@ -301,6 +301,10 @@ const getAdminEmailTemplate = (data: any) => `
 export async function POST(request: Request) {
   try {
     const data = await request.json();
+
+    // Typen anpassen
+    const { id }: { id: string } = data;
+
     console.log('Received booking data:', data);
 
     // Debug: Zeige Umgebungsvariablen (ohne sensible Daten)

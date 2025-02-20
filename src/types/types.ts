@@ -1,6 +1,8 @@
 import { Database } from '@/lib/database.types'
 
-export type Service = Database['public']['Tables']['services']['Row']
+export type Service = Database['public']['Tables']['services']['Row'] & {
+  category_id: string | null;
+}
 export type ServiceInsert = Database['public']['Tables']['services']['Insert']
 export type ServiceUpdate = Database['public']['Tables']['services']['Update']
 

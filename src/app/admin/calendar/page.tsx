@@ -9,20 +9,19 @@ import { toast } from '@/components/ui/use-toast';
 
 interface Booking {
   id: string;
-  customer_name: string;
-  service: {
-    name: string;
-    duration: string;
-    price: string;
-  };
   customer: {
     first_name: string;
     last_name: string;
     email: string;
     phone: string;
   };
-  date: string;
-  time: string;
+  service: {
+    name: string;
+    duration: string;
+    price: string;
+  };
+  booking_date: string;
+  booking_time: string;
   status: 'pending' | 'confirmed' | 'cancelled';
   notes?: string;
 }
@@ -93,44 +92,38 @@ export default function CalendarPage() {
         .from('bookings')
         .select(`
           id,
-          date,
-          time,
+          booking_date,
+          booking_time,
           status,
-          notes,
-          customer:profiles (
-            first_name,
-            last_name,
-            email,
-            phone
-          ),
-          service:services (
-            name,
-            duration,
-            price
-          )
+          notes
         `)
-        .gte('date', startDate)
-        .lte('date', endDate)
-        .order('date', { ascending: true })
-        .order('time', { ascending: true });
+        .gte('booking_date', startDate)
+        .lte('booking_date', endDate)
+        .order('booking_date', { ascending: true })
+        .order('booking_time', { ascending: true });
 
+      // Check for errors
       if (error) throw error;
 
-      // Ensure all dates are valid before setting state
-      const validBookings = (data || []).filter(booking => {
-        try {
-          // Validate date string
-          const date = new Date(booking.date);
-          if (isNaN(date.getTime())) {
-            console.warn('Invalid date found:', booking.date);
-            return false;
-          }
-          return true;
-        } catch (e) {
-          console.warn('Error parsing date:', e);
-          return false;
-        }
-      });
+      // Update validBookings without profile_id and service_id
+      const validBookings = (data || []).map(booking => ({
+        id: booking.id,
+        customer: {
+          first_name: '', // Placeholder as we cannot get this info
+          last_name: '',
+          email: '',
+          phone: ''
+        },
+        service: {
+          name: '', // Placeholder as we cannot get this info
+          duration: '',
+          price: ''
+        },
+        booking_date: booking.booking_date || '',
+        booking_time: booking.booking_time || '',
+        status: (booking.status as 'pending' | 'confirmed' | 'cancelled') || 'pending',
+        notes: booking.notes || ''
+      }));
 
       setBookings(validBookings);
     } catch (error) {
@@ -158,7 +151,7 @@ export default function CalendarPage() {
 
   const getBookingsForDate = (date: Date) => {
     return bookings.filter(booking => 
-      isSameDay(new Date(booking.date), date)
+      isSameDay(new Date(booking.booking_date), date)
     );
   };
 
@@ -207,7 +200,7 @@ export default function CalendarPage() {
                     className="p-2 rounded-md bg-background shadow-sm"
                   >
                     <div className="text-sm font-medium">
-                      {booking.time} - {booking.service.name}
+                      {booking.booking_time} - {booking.service.name}
                     </div>
                     <div className="text-sm text-muted-foreground">
                       {booking.customer.first_name} {booking.customer.last_name}
