@@ -1,3 +1,5 @@
+'use client';
+
 import { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import dynamic from 'next/dynamic';
