@@ -20,6 +20,19 @@ interface Settings {
   facebook_url?: string;
 }
 
+interface Json {
+  [key: string]: any;
+}
+
+interface DatabaseSettings {
+  id: string;
+  role: string;
+  setting_key: string;
+  setting_value: Json;
+  created_at: string;
+  updated_at: string;
+}
+
 const defaultSettings: Settings = {
   id: '',
   site_name: 'JOK Cosmetics',
@@ -29,6 +42,15 @@ const defaultSettings: Settings = {
   maintenance_mode: false,
   instagram_url: '',
   facebook_url: '',
+};
+
+const defaultDatabaseSettings: DatabaseSettings = {
+  id: '',
+  role: 'admin',
+  setting_key: '',
+  setting_value: {},
+  created_at: '',
+  updated_at: '',
 };
 
 export default function SettingsPage() {
@@ -93,18 +115,99 @@ export default function SettingsPage() {
       if (error) {
         if (error.code === 'PGRST116') {
           // No settings found, create default settings
-          const { error: insertError } = await supabase
-            .from('settings')
-            .insert([defaultSettings]);
+          const insertSettings = async (settings: DatabaseSettings) => {
+            const { error } = await supabase
+              .from('settings')
+              .insert([{
+                role: settings.role,
+                setting_key: settings.setting_key,
+                setting_value: settings.setting_value
+              }]);
 
-          if (insertError) throw insertError;
+            if (error) throw error;
+          };
+
+          await insertSettings({
+            ...defaultDatabaseSettings,
+            setting_key: 'site_name',
+            setting_value: { value: defaultSettings.site_name },
+          });
+
+          await insertSettings({
+            ...defaultDatabaseSettings,
+            setting_key: 'contact_email',
+            setting_value: { value: defaultSettings.contact_email },
+          });
+
+          await insertSettings({
+            ...defaultDatabaseSettings,
+            setting_key: 'contact_phone',
+            setting_value: { value: defaultSettings.contact_phone },
+          });
+
+          await insertSettings({
+            ...defaultDatabaseSettings,
+            setting_key: 'business_hours',
+            setting_value: { value: defaultSettings.business_hours },
+          });
+
+          await insertSettings({
+            ...defaultDatabaseSettings,
+            setting_key: 'maintenance_mode',
+            setting_value: { value: defaultSettings.maintenance_mode },
+          });
+
+          await insertSettings({
+            ...defaultDatabaseSettings,
+            setting_key: 'instagram_url',
+            setting_value: { value: defaultSettings.instagram_url },
+          });
+
+          await insertSettings({
+            ...defaultDatabaseSettings,
+            setting_key: 'facebook_url',
+            setting_value: { value: defaultSettings.facebook_url },
+          });
 
           setSettings(defaultSettings);
         } else {
           throw error;
         }
       } else {
-        setSettings(data || defaultSettings);
+        const settings = [data] as DatabaseSettings[];
+        const loadedSettings: Settings = {
+          ...defaultSettings,
+        };
+
+        settings.forEach((setting) => {
+          switch (setting.setting_key) {
+            case 'site_name':
+              loadedSettings.site_name = setting.setting_value.value;
+              break;
+            case 'contact_email':
+              loadedSettings.contact_email = setting.setting_value.value;
+              break;
+            case 'contact_phone':
+              loadedSettings.contact_phone = setting.setting_value.value;
+              break;
+            case 'business_hours':
+              loadedSettings.business_hours = setting.setting_value.value;
+              break;
+            case 'maintenance_mode':
+              loadedSettings.maintenance_mode = setting.setting_value.value;
+              break;
+            case 'instagram_url':
+              loadedSettings.instagram_url = setting.setting_value.value;
+              break;
+            case 'facebook_url':
+              loadedSettings.facebook_url = setting.setting_value.value;
+              break;
+            default:
+              break;
+          }
+        });
+
+        setSettings(loadedSettings);
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Fehler beim Laden der Einstellungen';
@@ -125,13 +228,61 @@ export default function SettingsPage() {
       setIsSaving(true);
       setError(null);
 
-      const { error } = await supabase
-        .from('settings')
-        .upsert([settings], {
-          onConflict: 'id',
-        });
+      const updateSettings = async (settings: DatabaseSettings) => {
+        const { error } = await supabase
+          .from('settings')
+          .upsert([{
+            role: settings.role,
+            setting_key: settings.setting_key,
+            setting_value: settings.setting_value
+          }], {
+            onConflict: 'id',
+          });
 
-      if (error) throw error;
+        if (error) throw error;
+      };
+
+      await updateSettings({
+        ...defaultDatabaseSettings,
+        setting_key: 'site_name',
+        setting_value: { value: settings.site_name },
+      });
+
+      await updateSettings({
+        ...defaultDatabaseSettings,
+        setting_key: 'contact_email',
+        setting_value: { value: settings.contact_email },
+      });
+
+      await updateSettings({
+        ...defaultDatabaseSettings,
+        setting_key: 'contact_phone',
+        setting_value: { value: settings.contact_phone },
+      });
+
+      await updateSettings({
+        ...defaultDatabaseSettings,
+        setting_key: 'business_hours',
+        setting_value: { value: settings.business_hours },
+      });
+
+      await updateSettings({
+        ...defaultDatabaseSettings,
+        setting_key: 'maintenance_mode',
+        setting_value: { value: settings.maintenance_mode },
+      });
+
+      await updateSettings({
+        ...defaultDatabaseSettings,
+        setting_key: 'instagram_url',
+        setting_value: { value: settings.instagram_url },
+      });
+
+      await updateSettings({
+        ...defaultDatabaseSettings,
+        setting_key: 'facebook_url',
+        setting_value: { value: settings.facebook_url },
+      });
 
       toast({
         title: 'Erfolg',

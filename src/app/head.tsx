@@ -10,7 +10,14 @@ export default function Head() {
         href="/images/logo/jok-text-logo.svg" 
         as="image" 
         type="image/svg+xml"
-        fetchpriority="high"
+        fetchPriority="high"
+      />
+      <link
+        rel="preload"
+        href="/fonts/Inter.var.woff2"
+        as="font"
+        type="font/woff2"
+        fetchPriority="high"
       />
     </>
   )
