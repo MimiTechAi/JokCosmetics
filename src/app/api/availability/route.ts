@@ -33,7 +33,7 @@ export async function GET(request: Request) {
     // Hole alle Buchungen für diesen Tag
     const { data: bookings, error: bookingsError } = await supabase
       .from('bookings')
-      .select('time')
+      .select('booking_time')
       .eq('date', date)
       .eq('service_id', serviceId)
       .eq('status', 'confirmed');
@@ -51,7 +51,7 @@ export async function GET(request: Request) {
       end: 18, // 18:00
     };
 
-    const bookedTimes = bookings?.map(b => b.time) || [];
+    const bookedTimes = bookings?.map(b => b.booking_time) || [];
     const availableTimes = [];
 
     for (let hour = workingHours.start; hour < workingHours.end; hour++) {
