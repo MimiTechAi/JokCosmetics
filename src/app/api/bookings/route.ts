@@ -106,27 +106,34 @@ export async function POST(req: Request) {
     startTime.setHours(parseInt(hours), parseInt(minutes));
 
     const endTime = new Date(startTime);
-    endTime.setMinutes(endTime.getMinutes() + service.duration);
+    endTime.setMinutes(endTime.getMinutes() + parseInt(service.duration));
+
+    const bookingData = {
+      service_id: validatedData.serviceId,
+      booking_date: validatedData.bookingDate,
+      booking_time: validatedData.bookingTime,
+      notes: validatedData.notes,
+      status: 'pending',
+      email: customer.email,
+      first_name: customer.first_name,
+      last_name: customer.last_name,
+      phone: customer.phone || '', // Stelle sicher, dass phone ein string ist
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
 
     const { data: booking, error: bookingError } = await supabase
       .from('bookings')
-      .insert({
-        customer_id: customer.id,
-        service_id: validatedData.serviceId,
-        start_time: startTime.toISOString(),
-        end_time: endTime.toISOString(),
-        notes: validatedData.notes,
-        status: 'pending'
-      })
+      .insert([bookingData])
       .select(`
         id,
-        start_time,
-        end_time,
+        booking_date,
+        booking_time,
         status,
         notes,
         services (
           id,
-          name,
+          title,
           duration
         ),
         customers (
@@ -143,20 +150,17 @@ export async function POST(req: Request) {
     }
 
     // Erstelle Benachrichtigung
-    const { error: notificationError } = await supabase
+    const { data: notification, error: notificationError } = await supabase
       .from('notifications')
-      .insert([
-        {
-          booking_id: booking.id,
-          type: 'email',
-          content: `Neue Buchung von ${customer.first_name} ${customer.last_name} für ${service.name}`
-        },
-        {
-          booking_id: booking.id,
-          type: 'whatsapp',
-          content: `Neue Buchung: ${service.name} am ${validatedData.bookingDate} um ${validatedData.bookingTime}`
-        }
-      ]);
+      .insert([{
+        booking_id: parseInt(booking.id), // Konvertiere booking_id zu number
+        type: 'booking_confirmation',
+        status: 'pending',
+        content: `Neue Buchung von ${customer.first_name} ${customer.last_name} für ${service.title}`,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        sent_at: null
+      }]);
 
     if (notificationError) {
       console.error('Fehler beim Erstellen der Benachrichtigungen:', notificationError);
