@@ -9,10 +9,10 @@ const supabase = createRouteHandlerClient({ cookies });
 // Erstelle eine Instanz des Agenten mit Supabase
 const agent = new SalonAgent(supabase);
 
-export async function POST(request: Request) {
+export async function POST(req: Request) {
   try {
     console.log('Starting chat request...');
-    const { message } = await request.json();
+    const { message } = await req.json();
     console.log('Received message:', message);
 
     // Prüfe ob der API-Key vorhanden ist
@@ -32,6 +32,9 @@ export async function POST(request: Request) {
     // Verarbeite die Nachricht mit dem Agenten
     const agentResponse = await agent.processMessage(message);
 
+    // Hole die Cookies
+    const cookieStore = await cookies();
+
     // Speichere den Chat-Verlauf anonym
     const { error: chatError } = await supabase
       .from('chat_history')
@@ -39,12 +42,12 @@ export async function POST(request: Request) {
         {
           user_message: message,
           role: 'user',
-          session_id: cookies().get('session_id')?.value || undefined
+          session_id: cookieStore.get('session_id')?.value || undefined
         },
         {
           ai_response: agentResponse.text,
           role: 'assistant',
-          session_id: cookies().get('session_id')?.value || undefined
+          session_id: cookieStore.get('session_id')?.value || undefined
         }
       ]);
 
