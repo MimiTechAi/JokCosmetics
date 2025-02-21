@@ -47,7 +47,7 @@ export async function loginAction(formData: FormData) {
 
 export async function clearAllCookies() {
   'use server';
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const allCookies = cookieStore.getAll();
   
   for (const cookie of allCookies) {

@@ -34,27 +34,27 @@ export default function Footer() {
             <h3 className="text-lg font-semibold mb-4 text-gray-900">Links</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/services" className="text-gray-600 hover:text-gray-900">
+                <Link href="/services" title="Dienstleistungen" className="text-gray-600 hover:text-gray-900">
                   Dienstleistungen
                 </Link>
               </li>
               <li>
-                <Link href="/book" className="text-gray-600 hover:text-gray-900">
+                <Link href="/book" title="Termin buchen" className="text-gray-600 hover:text-gray-900">
                   Termin buchen
                 </Link>
               </li>
               <li>
-                <Link href="/about" className="text-gray-600 hover:text-gray-900">
+                <Link href="/about" title="Über uns" className="text-gray-600 hover:text-gray-900">
                   Über uns
                 </Link>
               </li>
               <li>
-                <Link href="/datenschutz" className="text-gray-600 hover:text-gray-900">
+                <Link href="/datenschutz" title="Datenschutz" className="text-gray-600 hover:text-gray-900">
                   Datenschutz
                 </Link>
               </li>
               <li>
-                <Link href="/agb" className="text-gray-600 hover:text-gray-900">
+                <Link href="/agb" title="Allgemeine Geschäftsbedingungen" className="text-gray-600 hover:text-gray-900">
                   AGB
                 </Link>
               </li>
@@ -69,6 +69,7 @@ export default function Footer() {
                 href="https://www.instagram.com/jok.cosmetics/"
                 target="_blank"
                 rel="noopener noreferrer"
+                title="Visit our Instagram page"
                 className="text-gray-600 hover:text-gray-900"
               >
                 <FaInstagram className="h-6 w-6" />
@@ -77,6 +78,7 @@ export default function Footer() {
                 href="https://www.facebook.com/jokcosmetics"
                 target="_blank"
                 rel="noopener noreferrer"
+                title="Visit our Facebook page"
                 className="text-gray-600 hover:text-gray-900"
               >
                 <FaFacebook className="h-6 w-6" />
@@ -85,6 +87,7 @@ export default function Footer() {
                 href="https://wa.me/4915234720022"
                 target="_blank"
                 rel="noopener noreferrer"
+                title="Contact us on WhatsApp"
                 className="text-gray-600 hover:text-gray-900"
               >
                 <FaWhatsapp className="h-6 w-6" />

@@ -325,17 +325,18 @@ const ServiceModal = ({ service, onClose }: { service: ServiceData; onClose: () 
               <div>
                 <h4 className="text-xl font-semibold mb-3">Vorteile</h4>
                 <ul className="space-y-2">
-                  {service.benefits.map((benefit, index) => (
-                    <motion.li
-                      key={index}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.3 + index * 0.1 }}
-                      className="flex items-center gap-2 text-gray-600 dark:text-gray-300"
-                    >
-                      <span className="text-primary">✓</span>
-                      {benefit}
-                    </motion.li>
+                  {service.benefits?.map((benefit, index) => (
+                    <li key={index}>
+                      <motion.span
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.3, delay: index * 0.1 }}
+                        className="flex items-center space-x-2"
+                      >
+                        <span className="text-primary">•</span>
+                        <span>{benefit}</span>
+                      </motion.span>
+                    </li>
                   ))}
                 </ul>
               </div>

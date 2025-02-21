@@ -1,9 +1,7 @@
-'use client';
-
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import EditServiceModal from '@/components/EditServiceModal';
-import { Service } from '@/types/service';
+import dynamic from 'next/dynamic';
+const EditServiceModal = dynamic(() => import('@/components/EditServiceModal'), { ssr: false });
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -15,11 +13,53 @@ import {
 } from '@/components/ui/table';
 import { useRouter } from 'next/navigation';
 import { toast } from '@/components/ui/use-toast';
+import { Database } from '@/types/database';
+import { Json } from '@/types/supabase';
 
-type NewService = Omit<Service, 'id' | 'is_active' | 'image_url'> & {
+interface Service {
+  id: string;
+  name: string;
+  title: string;
+  description: string;
+  duration: number;
+  price: number;
+  category_id: string | null;
+  image_url: string;
+  is_active: boolean;
+  before_after_images: string[] | null;
+  benefits: string[] | null;
+  created_at: string | null;
+  custom_fields: Json;
+  video_url: string | null;
+}
+
+interface ServiceFormData {
   id?: string;
-  is_active?: boolean;
-  image_url?: string;
+  name: string;
+  description: string;
+  duration: number;
+  price: number;
+  category_id?: string;
+}
+
+const fetchServices = async (supabase: ReturnType<typeof createClient>) => {
+  try {
+    const { data, error } = await supabase
+      .from('services')
+      .select('*')
+      .order('sort_order', { ascending: true });
+
+    if (error) throw error;
+    return data?.map(service => ({
+      ...service,
+      duration: Number(service.duration),
+      price: Number(service.price),
+      name: service.title // Ensure name exists
+    })) as Service[];
+  } catch (error) {
+    console.error('Error fetching services:', error);
+    throw error;
+  }
 };
 
 export default function ServicesPage() {
@@ -31,73 +71,26 @@ export default function ServicesPage() {
   const supabase = createClient();
   const router = useRouter();
 
-  useEffect(() => {
-    checkAuthAndLoadServices();
-  }, []);
-
-  const checkAuthAndLoadServices = async () => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        router.push('/auth/login');
-        return;
-      }
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', session.user.id)
-        .single();
-
-      if (!profile?.role || profile.role !== 'admin') {
-        router.push('/auth/login');
-        return;
-      }
-
-      await fetchServices();
-    } catch (error) {
-      console.error('Auth check error:', error);
-      router.push('/auth/login');
-    }
-  };
-
-  const fetchServices = async () => {
+  const loadServices = useCallback(async () => {
     try {
       setLoading(true);
-      setError(null);
-      
-      const { data, error } = await supabase
-        .from('services')
-        .select(`
-          id,
-          name,
-          description,
-          duration,
-          price,
-          category,
-          is_active,
-          image_url
-        `)
-        .eq('is_active', true)
-        .order('name', { ascending: true });
-
-      if (error) throw error;
-
-      setServices(data || []);
+      const data = await fetchServices(supabase);
+      setServices(data);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Fehler beim Laden der Services';
-      console.error('Services error:', error);
-      setError(message);
+      setError(error instanceof Error ? error.message : 'Unknown error');
       toast({
-        title: 'Fehler',
-        description: message,
+        title: 'Error',
+        description: 'Failed to load services',
         variant: 'destructive',
       });
     } finally {
       setLoading(false);
     }
-  };
+  }, [supabase]);
+
+  useEffect(() => {
+    loadServices();
+  }, [loadServices]);
 
   const handleEdit = (service: Service) => {
     setSelectedService(service);
@@ -105,177 +98,142 @@ export default function ServicesPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Möchten Sie diesen Service wirklich löschen?')) return;
-
     try {
-      setLoading(true);
-      const { error } = await supabase
-        .from('services')
-        .delete()
-        .eq('id', id);
-
+      const { error } = await supabase.from('services').delete().eq('id', id);
       if (error) throw error;
-
-      await fetchServices();
+      await loadServices();
       toast({
-        title: 'Erfolg',
-        description: 'Service wurde gelöscht',
+        title: 'Success',
+        description: 'Service deleted successfully',
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Fehler beim Löschen des Services';
-      console.error('Delete error:', error);
-      setError(message);
+      console.error('Error deleting service:', error);
       toast({
-        title: 'Fehler',
-        description: message,
+        title: 'Error',
+        description: 'Failed to delete service',
         variant: 'destructive',
       });
-    } finally {
-      setLoading(false);
     }
   };
 
-  const handleSave = async (serviceData: NewService) => {
-    try {
-      setLoading(true);
-      setError(null);
+  const handleUpdate = async (values: Service) => {
+    if (!values.id) return;
+    
+    const updateData = {
+      ...values,
+      duration: values.duration.toString(),
+      price: values.price.toString()
+    };
+    
+    await supabase
+      .from('services')
+      .update(updateData)
+      .eq('id', values.id);
+  };
 
-      const service = {
+  const handleCreate = async (values: Omit<Service, 'id'>) => {
+    const createData = {
+      ...values,
+      duration: values.duration.toString(),
+      price: values.price.toString()
+    };
+    
+    await supabase
+      .from('services')
+      .insert(createData);
+  };
+
+  const handleSave = async (serviceData: { name: string; duration: number; price: number; id?: string; description?: string; category?: string }) => {
+    try {
+      const fullServiceData = {
         ...serviceData,
+        title: serviceData.name,
+        image_url: '',
         is_active: true,
-        image_url: serviceData.image_url || '',
+        category_id: serviceData.category || null,
+        before_after_images: null,
+        benefits: null,
+        created_at: null,
+        custom_fields: {},
+        video_url: null,
+        description: serviceData.description || ''
       };
 
-      if (service.id) {
-        // Update existing service
-        const { error } = await supabase
-          .from('services')
-          .update({
-            name: service.name,
-            description: service.description || '',
-            price: service.price,
-            duration: service.duration,
-            category: service.category || '',
-            is_active: true,
-            image_url: service.image_url,
-          })
-          .eq('id', service.id);
-
-        if (error) throw error;
+      if (serviceData.id) {
+        await handleUpdate(fullServiceData as Service);
       } else {
-        // Create new service
-        const { error } = await supabase
-          .from('services')
-          .insert([{
-            name: service.name,
-            description: service.description || '',
-            price: service.price,
-            duration: service.duration,
-            category: service.category || '',
-            is_active: true,
-            image_url: service.image_url,
-          }]);
-
-        if (error) throw error;
+        await handleCreate(fullServiceData);
       }
-
-      setIsModalOpen(false);
-      await fetchServices();
+      await loadServices();
       toast({
-        title: 'Erfolg',
-        description: `Service wurde ${service.id ? 'aktualisiert' : 'erstellt'}`,
+        title: 'Success',
+        description: 'Service saved successfully'
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Fehler beim Speichern des Services';
-      console.error('Save error:', error);
-      setError(message);
+      console.error('Error saving service:', error);
       toast({
-        title: 'Fehler',
-        description: message,
-        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to save service',
+        variant: 'destructive'
       });
-    } finally {
-      setLoading(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
   return (
-    <div className="container mx-auto py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold gradient-text">Dienstleistungen</h1>
-        <Button
-          variant="luxury"
-          onClick={() => {
-            setSelectedService(null);
-            setIsModalOpen(true);
-          }}
-        >
-          Neue Dienstleistung
-        </Button>
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Services Management</h1>
+        <Button onClick={() => setIsModalOpen(true)}>Add New Service</Button>
       </div>
 
-      {error && (
-        <div className="mb-4 p-4 rounded-md bg-destructive/10 text-destructive">
-          {error}
-        </div>
-      )}
+      {loading && <p>Loading...</p>}
+      {error && <p className="text-red-500">{error}</p>}
 
-      <div className="luxury-card">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Beschreibung</TableHead>
-              <TableHead>Preis</TableHead>
-              <TableHead>Dauer</TableHead>
-              <TableHead>Kategorie</TableHead>
-              <TableHead className="text-right">Aktionen</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {services.map((service) => (
-              <TableRow key={service.id}>
-                <TableCell>{service.name}</TableCell>
-                <TableCell>{service.description}</TableCell>
-                <TableCell>{service.price}€</TableCell>
-                <TableCell>{service.duration} Min.</TableCell>
-                <TableCell>{service.category}</TableCell>
-                <TableCell className="text-right space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEdit(service)}
-                  >
-                    Bearbeiten
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+            <TableHead>Price</TableHead>
+            <TableHead>Duration</TableHead>
+            <TableHead>Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {services.map((service) => (
+            <TableRow key={service.id}>
+              <TableCell>{service.name}</TableCell>
+              <TableCell>{service.price}€</TableCell>
+              <TableCell>{service.duration} minutes</TableCell>
+              <TableCell>
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={() => handleEdit(service)}>
+                    Edit
                   </Button>
                   <Button
                     variant="destructive"
-                    size="sm"
                     onClick={() => handleDelete(service.id)}
                   >
-                    Löschen
+                    Delete
                   </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
 
-      <EditServiceModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSave={handleSave}
-        service={selectedService}
-      />
+      {isModalOpen && (
+        <EditServiceModal
+          isOpen={isModalOpen}
+          service={selectedService}
+          onClose={() => {
+            setIsModalOpen(false);
+            setSelectedService(null);
+            loadServices();
+          }}
+          onSave={handleSave}
+        />
+      )}
     </div>
   );
 }

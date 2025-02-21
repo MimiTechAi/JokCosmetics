@@ -103,14 +103,12 @@ export default function ContactPage() {
             className="relative h-[600px] rounded-2xl overflow-hidden shadow-2xl"
           >
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2632.8015937905747!2d8.731752776268386!3d48.76646667131!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47971c3a8c4b3c4d%3A0x1c3b5c3b5c3b5c3b!2sWilhelmstra%C3%9Fe%2017%2C%2075378%20Bad%20Liebenzell!5e0!3m2!1sde!2sde!4v1620000000000!5m2!1sde!2sde"
-              width="100%"
-              height="100%"
-              style={{ border: 0 }}
+              title="JOK Cosmetics Standort - Google Maps"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2632.8015937905747!2d8.731752776268386!3d48.76646667131!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47971c3a8c4b3c4d%3A0x1c3b5c3b5c3b5c3b!2sWilhelmstra%C3%9Fe%2017%2C%2075378%20Bad%20Liebenzell"
+              className="w-full h-full border-0"
               allowFullScreen
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
-              className="absolute inset-0"
             />
           </motion.div>
         </div>
