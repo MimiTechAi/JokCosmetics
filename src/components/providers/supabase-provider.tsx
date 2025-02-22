@@ -1,12 +1,24 @@
 'use client'
 
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import { createContext, useContext } from 'react'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import type { Database } from '@/lib/supabase/database-types'
+import { createContext, useContext } from 'react'
 
-const Context = createContext<Database | undefined>(undefined)
+const Context = createContext<{
+  public: Database['public']
+}>({
+  public: {
+    Tables: {},
+    Views: {},
+    Functions: {},
+    Enums: {}
+  }
+})
 
-export const supabase = createClientComponentClient<Database>()
+export const supabase = createClientComponentClient<Database['public']>({
+  supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+})
 
 export function SupabaseProvider({
   children,
@@ -14,7 +26,14 @@ export function SupabaseProvider({
   children: React.ReactNode
 }) {
   return (
-    <Context.Provider value={supabase}>
+    <Context.Provider value={{ 
+      public: {
+        Tables: {},
+        Views: {},
+        Functions: {},
+        Enums: {}
+      } 
+    }}>
       {children}
     </Context.Provider>
   )

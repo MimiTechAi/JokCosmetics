@@ -62,7 +62,7 @@ test.describe('Visual Regression Tests', () => {
           fullPage: true,
           threshold: 0.3,
           timeout: 15000,
-          animations: 'disabled'
+          animations: 'disabled' as const
         };
 
         // Take the screenshot
