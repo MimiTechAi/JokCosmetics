@@ -105,3 +105,7 @@ export default function LoginPage() {
     </div>
   );
 }
+
+export const viewport = {
+  themeColor: '#ffffff',
+};

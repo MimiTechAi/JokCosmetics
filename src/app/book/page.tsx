@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/database';
 import { BookingForm } from '@/components/BookingForm';
 import { PageContainer } from '@/components/PageContainer';
@@ -19,8 +19,10 @@ interface Service {
 
 async function getServices() {
   try {
-    const cookieStore = cookies();
-    const supabase = createServerComponentClient<Database>({ cookies: () => cookieStore });
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
 
     const { data: services, error } = await supabase
       .from('services')
@@ -45,7 +47,8 @@ async function getServices() {
     const formattedServices = services.map((service) => ({
       ...service,
       price: parseFloat(service.price.toString()),
-      category_id: service.category_id || ''
+      category_id: service.category_id || '',
+      service_categories: service.service_categories && service.service_categories.length > 0 ? service.service_categories[0] : null
     }));
 
     return formattedServices;

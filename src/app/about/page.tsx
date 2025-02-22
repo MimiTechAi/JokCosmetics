@@ -101,3 +101,7 @@ export default function AboutPage() {
     </PageContainer>
   );
 }
+
+export const viewport = {
+  themeColor: '#ffffff',
+};
