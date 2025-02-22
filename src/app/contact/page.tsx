@@ -3,12 +3,36 @@
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { PageContainer } from '@/components/PageContainer';
+import { useEffect, useRef } from 'react';
 
 export default function ContactPage() {
   const [ref, inView] = useInView({
     threshold: 0.1,
     triggerOnce: true,
   });
+
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && iframeRef.current) {
+          iframeRef.current.src = iframeRef.current.dataset.src || '';
+          observer.unobserve(iframeRef.current);
+        }
+      });
+    }, { rootMargin: '200px' });
+
+    if (iframeRef.current) {
+      observer.observe(iframeRef.current);
+    }
+
+    return () => {
+      if (iframeRef.current) {
+        observer.unobserve(iframeRef.current);
+      }
+    };
+  }, []);
 
   return (
     <PageContainer>
@@ -103,11 +127,11 @@ export default function ContactPage() {
             className="relative h-[600px] rounded-2xl overflow-hidden shadow-2xl"
           >
             <iframe
+              ref={iframeRef}
               title="JOK Cosmetics Standort - Google Maps"
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2632.8015937905747!2d8.731752776268386!3d48.76646667131!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47971c3a8c4b3c4d%3A0x1c3b5c3b5c3b5c3b!2sWilhelmstra%C3%9Fe%2017%2C%2075378%20Bad%20Liebenzell"
+              data-src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2632.8015937905747!2d8.731752776268386!3d48.76644667131!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47971c3a8c4b3c4d%3A0x1c3b5c3b5c3b5c3b!2sWilhelmstra%C3%9Fe%2017%2C%2075378%20Bad%20Liebenzell"
               className="w-full h-full border-0"
               allowFullScreen
-              loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
             />
           </motion.div>

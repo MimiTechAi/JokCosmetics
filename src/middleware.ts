@@ -1,7 +1,7 @@
 import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import type { Database } from '@/types/database';
+import type { Database } from '@/types/supabase';
 
 const COOKIE_OPTIONS = {
   name: 'sb-auth',
@@ -15,22 +15,7 @@ export async function middleware(request: NextRequest) {
   try {
     // Create response and Supabase client
     const res = NextResponse.next();
-    const supabase = createMiddlewareClient<Database>({
-      req: request,
-      res,
-      options: {
-        auth: {
-          persistSession: true,
-          storageKey: 'sb-session',
-          flowType: 'pkce',
-          detectSessionInUrl: false
-        },
-        cookies: {
-          ...COOKIE_OPTIONS,
-          secure: process.env.NODE_ENV === 'production'
-        }
-      }
-    });
+    const supabase = createMiddlewareClient<Database>({ req: request, res });
 
     // Get session without manual token handling
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
@@ -50,13 +35,21 @@ export async function middleware(request: NextRequest) {
       }
 
       // Check admin role
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (!user) {
+        return NextResponse.redirect(new URL('/auth/login', request.url));
+      }
       const { data: profile } = await supabase
         .from('profiles')
         .select('role')
-        .eq('id', session.user.id)
+        .eq('id', user.id as string)
         .single();
 
-      if (!profile || profile.role !== 'admin') {
+      if (profile && 'role' in profile) {
+        if (profile.role !== 'admin') {
+          return NextResponse.redirect(new URL('/', request.url));
+        }
+      } else {
         return NextResponse.redirect(new URL('/', request.url));
       }
     }
@@ -68,6 +61,7 @@ export async function middleware(request: NextRequest) {
   }
 }
 
+// Updated middleware configuration
 export const config = {
-  matcher: ['/admin/:path*', '/auth/login']
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
 };
