@@ -3,15 +3,16 @@
 import { useRouter } from 'next/navigation';
 import { LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useSupabase } from '@/components/providers/supabase-provider';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import type { Database } from '@/lib/supabase/database-types';
 
 export function LogoutButton() {
   const router = useRouter();
-  const supabase = useSupabase();
 
   const handleLogout = async () => {
+    const supabase = createClientComponentClient<Database>();
     await supabase.auth.signOut();
-    router.push('/auth/login');
+    window.location.href = '/';
   };
 
   return (
