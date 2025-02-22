@@ -15,8 +15,9 @@ import {
 } from '@/components/ui/table';
 import { useRouter } from 'next/navigation';
 import { toast } from '@/components/ui/use-toast';
-import { Database } from '@/types/database';
-import { Json } from '@/types/supabase';
+import { Database } from '@/types/supabase';
+
+type Json = Database['public']['Tables']['services']['Row'];
 
 interface Service {
   id: string;
@@ -31,7 +32,7 @@ interface Service {
   before_after_images: string[] | null;
   benefits: string[] | null;
   created_at: string | null;
-  custom_fields: Json;
+  custom_fields: Record<string, unknown> | null;
   video_url: string | null;
 }
 
@@ -119,12 +120,11 @@ export default function ServicesPage() {
   };
 
   const handleUpdate = async (values: Service) => {
-    if (!values.id) return;
-    
     const updateData = {
       ...values,
       duration: values.duration.toString(),
-      price: values.price.toString()
+      price: values.price.toString(),
+      custom_fields: values.custom_fields ? JSON.parse(JSON.stringify(values.custom_fields)) : null
     };
     
     await supabase
@@ -137,7 +137,8 @@ export default function ServicesPage() {
     const createData = {
       ...values,
       duration: values.duration.toString(),
-      price: values.price.toString()
+      price: values.price.toString(),
+      custom_fields: values.custom_fields ? JSON.parse(JSON.stringify(values.custom_fields)) : null
     };
     
     await supabase
