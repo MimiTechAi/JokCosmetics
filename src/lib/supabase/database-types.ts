@@ -1,3 +1,5 @@
+import { BookingStatus } from '../../types/booking';
+
 export type Database = {
   public: {
     Tables: Record<string, any>,
@@ -17,7 +19,7 @@ export type Booking = {
   email: string;
   phone: string;
   notes?: string;
-  status: string;
+  status: BookingStatus;
   created_at: string;
   updated_at: string;
 };
