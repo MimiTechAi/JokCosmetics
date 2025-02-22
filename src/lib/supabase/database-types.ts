@@ -2,12 +2,15 @@ import { BookingStatus } from '../../types/booking';
 
 export type Database = {
   public: {
-    Tables: Record<string, any>,
-    Views: Record<string, any>,
-    Functions: Record<string, any>,
-    Enums: Record<string, any>
-  }
-}
+    Tables: Record<string, any>;
+    Views: Record<string, any>;
+    Functions: Record<string, any>;
+    Enums: Record<string, any>;
+  };
+  auth: {
+    signOut: () => Promise<void>;
+  };
+};
 
 export type Booking = {
   id: string;
