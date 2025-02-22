@@ -10,7 +10,7 @@ interface Service {
   description: string;
   duration: string;
   price: number;
-  category_id: string;
+  category_id: string | null;
   service_categories: {
     id: string;
     name: string;
@@ -44,7 +44,8 @@ async function getServices() {
 
     const formattedServices = services.map((service) => ({
       ...service,
-      price: parseFloat(service.price.toString())
+      price: parseFloat(service.price.toString()),
+      category_id: service.category_id || ''
     }));
 
     return formattedServices;
