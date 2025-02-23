@@ -37,25 +37,20 @@ const localInter = localFont({
 })
 
 export const metadata: Metadata = {
-  title: 'JOK Cosmetics - Ihr professionelles Beauty Studio',
-  description: 'JOK Cosmetics - Ihr professionelles Beauty Studio für Permanent Make-up, Wimpern und Gesichtsbehandlungen in höchster Qualität.',
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#000000' }
-  ],
+  title: 'JOK Cosmetics',
+  description: 'Professionelles Permanent Make-up und Wimpernverlängerung in Bad Liebenzell',
+  viewport: 'width=device-width, initial-scale=1, maximum-scale=1',
   icons: {
-    icon: '/favicon.ico',
-    apple: '/apple-touch-icon.png',
+    icon: '/favicon/favicon.ico',
+    shortcut: '/favicon/favicon.ico',
+    apple: '/favicon/apple-touch-icon.png',
+    other: {
+      rel: 'apple-touch-icon',
+      url: '/favicon/apple-touch-icon.png',
+    },
   },
-  robots: {
-    index: true,
-    follow: true
-  },
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    viewportFit: 'cover',
-  }
+  manifest: '/manifest.json',
+  themeColor: '#ffffff',
 }
 
 export default function RootLayout({

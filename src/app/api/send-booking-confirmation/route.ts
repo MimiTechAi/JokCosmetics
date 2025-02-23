@@ -165,7 +165,7 @@ const getCustomerEmailTemplate = (data: any) => `
   </div>
 
   <div class="social-icons">
-    <a href="https://www.instagram.com/jok.cosmetics/">
+    <a href="https://www.instagram.com/jok_cosmetics/">
       <img src="${INSTAGRAM_ICON}" alt="Instagram" width="32">
     </a>
     <a href="https://www.facebook.com/jokcosmetics">

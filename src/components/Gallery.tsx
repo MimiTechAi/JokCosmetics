@@ -3,41 +3,42 @@
 import { useState } from 'react';
 import { ImageContainer } from '@/components/ui/image-container';
 import { motion } from 'framer-motion';
+import Image from 'next/image';
 
 const galleryImages = [
   {
-    src: '/images/gallery/WhatsApp Image 2024-10-12 at 20.31.43.jpeg',
-    category: 'Wimpern',
-    alt: 'Wimpernverlängerung Beispiel'
-  },
-  {
     src: '/images/gallery/WhatsApp Image 2024-10-12 at 20.33.49.jpeg',
-    category: 'Permanent Make-up',
-    alt: 'Permanent Make-up Beispiel'
+    category: 'Classic Lashes',
+    alt: 'Klassische Wimpernverlängerung - Natürlicher Look'
   },
   {
     src: '/images/gallery/WhatsApp Image 2024-10-12 at 20.34.53.jpeg',
-    category: 'Microblading',
-    alt: 'Microblading Beispiel'
-  },
-  {
-    src: '/images/gallery/WhatsApp Image 2025-01-09 at 22.31.21.jpeg',
-    category: 'Kosmetik',
-    alt: 'Kosmetik Behandlung'
-  },
-  {
-    src: '/images/services/powder-brows.jpg',
-    category: 'Permanent Make-up',
-    alt: 'Powder Brows'
+    category: 'Volume Lashes',
+    alt: 'Volume Wimpern - Dramatischer Look'
   },
   {
     src: '/images/services/lashes-mega-volume.jpg',
-    category: 'Wimpern',
-    alt: 'Mega Volume Lashes'
+    category: 'Mega Volume',
+    alt: 'Mega Volume Wimpern - Luxuriöser Look'
+  },
+  {
+    src: '/images/gallery/WhatsApp Image 2024-10-12 at 20.31.43.jpeg',
+    category: 'Classic Lashes',
+    alt: 'Klassische Wimpernverlängerung - Seitenansicht'
+  },
+  {
+    src: '/images/services/lashes-refill-volume.jpg',
+    category: 'Volume Lashes',
+    alt: 'Volume Wimpern - Nahaufnahme'
+  },
+  {
+    src: '/images/gallery/WhatsApp Image 2025-01-09 at 22.31.21.jpeg',
+    category: 'Mega Volume',
+    alt: 'Mega Volume Wimpern - Detailansicht'
   }
 ];
 
-const categories = ['Alle', 'Wimpern', 'Permanent Make-up', 'Microblading', 'Kosmetik'];
+const categories = ['Alle', 'Classic Lashes', 'Volume Lashes', 'Mega Volume'];
 
 const Gallery = () => {
   const [activeCategory, setActiveCategory] = useState('Alle');
@@ -82,15 +83,16 @@ const Gallery = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="relative rounded-2xl overflow-hidden shadow-lg"
+              className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-lg group"
             >
-              <div className="aspect-w-4 aspect-h-3">
-                <ImageContainer
-                  src={image.src}
-                  alt={image.alt}
-                  className="rounded-2xl transform hover:scale-105 transition-transform duration-300"
-                />
-              </div>
+              <Image
+                src={image.src}
+                alt={image.alt}
+                fill
+                className="object-cover transform group-hover:scale-105 transition-transform duration-300"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                priority={index < 3}
+              />
             </motion.div>
           ))}
         </div>

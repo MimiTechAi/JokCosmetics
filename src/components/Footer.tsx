@@ -66,7 +66,7 @@ export default function Footer() {
             <h3 className="text-lg font-semibold mb-4 text-gray-900">Social Media</h3>
             <div className="flex space-x-4">
               <a
-                href="https://www.instagram.com/jok.cosmetics/"
+                href="https://www.instagram.com/jok_cosmetics/"
                 target="_blank"
                 rel="noopener noreferrer"
                 title="Visit our Instagram page"

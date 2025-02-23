@@ -40,7 +40,7 @@ const defaultSettings: Settings = {
   contact_phone: '',
   business_hours: '',
   maintenance_mode: false,
-  instagram_url: '',
+  instagram_url: 'https://www.instagram.com/jok_cosmetics/',
   facebook_url: '',
 };
 
