@@ -44,7 +44,7 @@ export default function LocationMap() {
             <div>
               <h3 className="text-xl font-semibold mb-2">Kontakt</h3>
               <div className="space-y-2 text-gray-600">
-                <p>Telefon: +49 (0) 123 456789</p>
+                <p>Telefon: +49 173 5390928</p>
                 <p>E-Mail: info@jok-cosmetics.de</p>
               </div>
             </div>
@@ -66,11 +66,12 @@ export default function LocationMap() {
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2635.975247692164!2d8.729911715674392!3d48.76514997927728!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47977af499f849f9%3A0x435b6a8353a8c70f!2sKirchstra%C3%9Fe%201%2C%2075378%20Bad%20Liebenzell!5e0!3m2!1sde!2sde!4v1641234567890!5m2!1sde!2sde"
               width="100%"
               height="100%"
-              style={{ border: 0 }}
+              className="border-0 rounded-lg"
               allowFullScreen
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
-              className="rounded-lg"
+              title="Jok Cosmetics Standort"
+              aria-label="Google Maps Karte mit dem Standort von Jok Cosmetics in Bad Liebenzell"
             />
           </div>
         </div>

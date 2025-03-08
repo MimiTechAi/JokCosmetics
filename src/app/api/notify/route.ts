@@ -7,7 +7,7 @@ import { de } from 'date-fns/locale';
 // Supabase Client initialisieren
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!, // Wichtig: Service Role Key verwenden!
+  process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY!, // Korrigiert von SUPABASE_SERVICE_ROLE_KEY
   {
     auth: {
       autoRefreshToken: false,

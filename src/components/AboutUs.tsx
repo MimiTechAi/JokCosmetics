@@ -56,7 +56,7 @@ const AboutUs = () => {
 
             <div className="mt-8">
               <a 
-                href="https://api.whatsapp.com/message/KC7WPZJIZW3DO1?autoload=1&app_absent=0"
+                href="https://wa.me/491735390928"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-medium rounded-full transition-colors duration-200"

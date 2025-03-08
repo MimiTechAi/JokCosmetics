@@ -13,8 +13,8 @@ export default function Footer() {
             <h3 className="text-lg font-semibold mb-4 text-gray-900">Kontakt</h3>
             <ul className="space-y-2">
               <li>
-                <a href="tel:+4915234720022" className="text-gray-600 hover:text-gray-900">
-                  +49 152 34720022
+                <a href="tel:+491735390928" className="text-gray-600 hover:text-gray-900">
+                  +49 173 5390928
                 </a>
               </li>
               <li>
@@ -84,7 +84,7 @@ export default function Footer() {
                 <FaFacebook className="h-6 w-6" />
               </a>
               <a
-                href="https://wa.me/4915234720022"
+                href="https://wa.me/491735390928"
                 target="_blank"
                 rel="noopener noreferrer"
                 title="Contact us on WhatsApp"

@@ -61,11 +61,11 @@ export default function ContactForm() {
                   </svg>
                   <div>
                     <h4 className="font-semibold text-gray-900">Telefon & WhatsApp</h4>
-                    <a href="tel:+4917353909280" className="text-pink-500 hover:text-pink-600 block">
+                    <a href="tel:+491735390928" className="text-pink-500 hover:text-pink-600 block">
                       +49 173 5390928
                     </a>
                     <a
-                      href="https://wa.me/4917353909280"
+                      href="https://wa.me/491735390928"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-green-500 hover:text-green-600 flex items-center mt-2"
@@ -90,23 +90,40 @@ export default function ContactForm() {
             </div>
           </motion.div>
 
-          {/* Google Maps */}
+          {/* Location Karte */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="h-[500px] rounded-lg overflow-hidden shadow-lg"
+            className="bg-white rounded-lg overflow-hidden shadow-lg p-8 flex flex-col items-center justify-center"
           >
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2631.8040008447687!2d8.731843776889714!3d48.76646667131283!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47977af49e2af6ef%3A0x66d8fe28b0a0e7!2sWilhelmstra%C3%9Fe%2017%2C%2075378%20Bad%20Liebenzell!5e0!3m2!1sde!2sde!4v1704632841695!5m2!1sde!2sde"
-              width="100%"
-              height="100%"
-              style={{ border: 0 }}
-              allowFullScreen
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            />
+            <div className="w-full max-w-md mx-auto flex flex-col items-center">
+              <div className="text-pink-500 mb-4">
+                <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                </svg>
+              </div>
+              
+              <h3 className="text-2xl font-bold text-gray-900 mb-4 text-center">Unsere Location</h3>
+              
+              <div className="text-gray-600 text-center mb-6">
+                <p className="mb-1">Wilhelmstraße 17</p>
+                <p>75378 Bad Liebenzell</p>
+              </div>
+              
+              <a 
+                href="https://www.google.com/maps/place/Wilhelmstra%C3%9Fe+17,+75378+Bad+Liebenzell/@48.7661497,8.7321891,17z/data=!3m1!4b1!4m6!3m5!1s0x47977af49e2af6ef:0x66d8fe28b0a0e7!8m2!3d48.7661497!4d8.7343778!16s%2Fg%2F11csn0l4lk?entry=ttu" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center px-6 py-3 bg-pink-500 hover:bg-pink-600 text-white font-medium rounded-full transition-colors duration-200"
+              >
+                In Google Maps öffnen
+                <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </a>
+            </div>
           </motion.div>
         </div>
       </div>

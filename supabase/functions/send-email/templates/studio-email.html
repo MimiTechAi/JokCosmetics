@@ -4,68 +4,67 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neue Buchung eingegangen</title>
+    <link rel="stylesheet" href="css/email-styles.css">
 </head>
-<body style="font-family: 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333333; margin: 0; padding: 0; background-color: #f9f5ff; -webkit-font-smoothing: antialiased;">
-    <div style="max-width: 600px; margin: 20px auto; padding: 0; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 30px rgba(74, 21, 75, 0.15);">
+<body class="email-body">
+    <div class="container">
         <!-- Header -->
-        <div style="text-align: center; padding: 40px 20px; background: linear-gradient(135deg, #4A154B 0%, #8A2387 50%, #D4AF37 100%);">
-            <img src="https://jok-cosmetics.de/images/logo/jok-logo.png" alt="JOK Cosmetics Logo" style="max-width: 200px; height: auto; margin-bottom: 25px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));">
-            <h1 style="color: white; margin: 0; font-size: 36px; letter-spacing: -0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">Neue Buchung eingegangen</h1>
+        <div class="header">
+            <img src="https://jok-cosmetics.de/images/logo/jok-logo.png" alt="JOK Cosmetics Logo" class="header-logo">
+            <h1 class="header-title">Neue Buchung eingegangen</h1>
         </div>
         
         <!-- Content -->
-        <div style="padding: 40px 30px;">
+        <div class="content">
             <!-- Booking Details -->
-            <div style="background: linear-gradient(135deg, #f9f5ff 0%, #fff5e6 100%); padding: 30px; border-radius: 12px; margin: 25px 0; border-left: 4px solid #D4AF37; box-shadow: 0 4px 15px rgba(74, 21, 75, 0.08);">
-                <h2 style="color: #4A154B; margin-top: 0; font-size: 24px; letter-spacing: -0.5px; margin-bottom: 20px;">Buchungsdetails</h2>
-                <p style="color: #4a4a4a; font-size: 16px; margin: 12px 0;"><strong style="color: #4A154B;">Service:</strong> {{service_name}}</p>
-                <p style="color: #4a4a4a; font-size: 16px; margin: 12px 0;"><strong style="color: #4A154B;">Datum:</strong> {{booking_date}}</p>
-                <p style="color: #4a4a4a; font-size: 16px; margin: 12px 0;"><strong style="color: #4A154B;">Uhrzeit:</strong> {{booking_time}}</p>
-                <p style="color: #4a4a4a; font-size: 16px; margin: 12px 0;"><strong style="color: #4A154B;">Dauer:</strong> {{duration}} Minuten</p>
-                <p style="color: #4a4a4a; font-size: 16px; margin: 12px 0;"><strong style="color: #4A154B;">Preis:</strong> {{price}} €</p>
+            <div class="booking-details">
+                <h2 class="booking-details-title">Buchungsdetails</h2>
+                <p class="detail-item"><strong class="detail-label">Service:</strong> {{service_name}}</p>
+                <p class="detail-item"><strong class="detail-label">Datum:</strong> {{booking_date}}</p>
+                <p class="detail-item"><strong class="detail-label">Uhrzeit:</strong> {{booking_time}}</p>
+                <p class="detail-item"><strong class="detail-label">Dauer:</strong> {{duration}} Minuten</p>
+                <p class="detail-item"><strong class="detail-label">Preis:</strong> {{price}} €</p>
             </div>
 
             <!-- Customer Info -->
-            <div style="background-color: #ffffff; padding: 25px; border-radius: 12px; margin: 25px 0; border: 2px solid #D4AF37; box-shadow: 0 4px 15px rgba(74, 21, 75, 0.08);">
-                <h3 style="color: #4A154B; margin-top: 0; font-size: 20px; letter-spacing: -0.5px; margin-bottom: 15px;">Kundendetails</h3>
-                <p style="color: #4a4a4a; font-size: 16px; margin: 12px 0;"><strong style="color: #4A154B;">Name:</strong> {{customer_name}}</p>
-                <p style="color: #4a4a4a; font-size: 16px; margin: 12px 0;"><strong style="color: #4A154B;">E-Mail:</strong> {{customer_email}}</p>
-                <p style="color: #4a4a4a; font-size: 16px; margin: 12px 0;"><strong style="color: #4A154B;">Telefon:</strong> {{customer_phone}}</p>
-                <p style="color: #4a4a4a; font-size: 16px; margin: 12px 0;"><strong style="color: #4A154B;">Anmerkungen:</strong> {{notes}}</p>
+            <div class="customer-info">
+                <h3 class="customer-info-title">Kundendetails</h3>
+                <p class="detail-item"><strong class="detail-label">Name:</strong> {{customer_name}}</p>
+                <p class="detail-item"><strong class="detail-label">E-Mail:</strong> {{customer_email}}</p>
+                <p class="detail-item"><strong class="detail-label">Telefon:</strong> {{customer_phone}}</p>
+                <p class="detail-item"><strong class="detail-label">Anmerkungen:</strong> {{notes}}</p>
             </div>
 
             <!-- Action Buttons -->
-            <div style="text-align: center; display: flex; gap: 16px; justify-content: center; margin: 30px 0;">
-                <a href="https://jok-cosmetics.de/admin/bookings/confirm/{{booking_id}}" 
-                   style="display: inline-block; padding: 16px 36px; background: linear-gradient(135deg, #4A154B 0%, #8A2387 50%, #D4AF37 100%); color: white; text-decoration: none; border-radius: 30px; font-weight: bold; text-align: center; box-shadow: 0 4px 15px rgba(74, 21, 75, 0.2); transition: all 0.3s ease; min-width: 160px;">
+            <div class="button-container">
+                <a href="https://jok-cosmetics.de/admin/bookings/confirm/{{booking_id}}" class="cta-button">
                     Bestätigen
                 </a>
-                <a href="https://jok-cosmetics.de/admin/bookings/reject/{{booking_id}}" 
-                   style="display: inline-block; padding: 16px 36px; background: white; color: #4A154B; text-decoration: none; border-radius: 30px; font-weight: bold; text-align: center; box-shadow: 0 4px 15px rgba(74, 21, 75, 0.08); border: 2px solid #4A154B; transition: all 0.3s ease; min-width: 160px;">
+                <a href="https://jok-cosmetics.de/admin/bookings/reject/{{booking_id}}" class="cta-button secondary">
                     Ablehnen
                 </a>
             </div>
 
             <!-- Info Box -->
-            <div style="background: linear-gradient(135deg, #f9f5ff 0%, #fff5e6 100%); padding: 25px; border-radius: 12px; margin: 25px 0; text-align: center; box-shadow: 0 4px 15px rgba(74, 21, 75, 0.08);">
-                <p style="color: #4a4a4a; font-size: 16px; margin: 0;">
+            <div class="info-box">
+                <p class="text">
                     Sie können die Buchung direkt über die Buttons oben bestätigen oder ablehnen.<br>
                     Der Kunde wird automatisch über Ihre Entscheidung informiert.
                 </p>
             </div>
 
             <!-- Footer -->
-            <div style="text-align: center; margin-top: 40px; padding-top: 30px; border-top: 2px solid #f0f0f0;">
-                <div style="margin: 20px 0;">
-                    <p style="color: #4A154B; font-weight: bold; margin-bottom: 10px;">JOK Cosmetics</p>
-                    <p style="color: #4a4a4a; font-size: 14px; line-height: 1.8; margin: 0;">
+            <div class="footer">
+                <div class="footer-contact">
+                    <p class="footer-text">JOK Cosmetics</p>
+                    <p class="footer-text">
                         Wilhelmstraße 17<br>
                         75378 Bad Liebenzell<br>
                         Tel: +49 173 5390 9280<br>
-                        <a href="mailto:info@jok-cosmetics.de" style="color: #4A154B; text-decoration: none;">info@jok-cosmetics.de</a>
+                        <a href="mailto:info@jok-cosmetics.de" class="footer-link">info@jok-cosmetics.de</a>
                     </p>
                 </div>
-                <p style="color: #888888; font-size: 12px; margin-top: 20px;">
+                <p class="copyright">
                     &copy; 2025 JOK Cosmetics. Alle Rechte vorbehalten.<br>
                     <small>Diese E-Mail wurde automatisch generiert. Bitte antworten Sie nicht auf diese E-Mail.</small>
                 </p>

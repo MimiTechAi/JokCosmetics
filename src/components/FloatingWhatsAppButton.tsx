@@ -18,7 +18,7 @@ const FloatingWhatsAppButton = () => {
         </div>
       )}
       <a
-        href="https://api.whatsapp.com/message/KC7WPZJIZW3DO1?autoload=1&app_absent=0"
+        href="https://wa.me/491735390928"
         target="_blank"
         rel="noopener noreferrer"
         className="flex items-center justify-center w-16 h-16 bg-green-500 rounded-full shadow-xl hover:bg-green-600 transition-all duration-300 group hover:scale-105 hover:shadow-2xl"

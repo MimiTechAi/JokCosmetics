@@ -4,14 +4,14 @@ import { useState } from 'react';
 
 interface BeautindaImportModalProps {
   isOpen: boolean;
-  onClose: () => void;
-  onImport: (email: string, password: string) => Promise<void>;
+  onCloseAction: () => void;
+  onImportAction: (email: string, password: string) => Promise<void>;
 }
 
 export default function BeautindaImportModal({
   isOpen,
-  onClose,
-  onImport,
+  onCloseAction,
+  onImportAction,
 }: BeautindaImportModalProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -26,8 +26,8 @@ export default function BeautindaImportModal({
     setError('');
 
     try {
-      await onImport(email, password);
-      onClose();
+      await onImportAction(email, password);
+      onCloseAction();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ein Fehler ist aufgetreten');
     } finally {
@@ -87,7 +87,7 @@ export default function BeautindaImportModal({
           <div className="flex justify-end space-x-4 mt-6">
             <button
               type="button"
-              onClick={onClose}
+              onClick={onCloseAction}
               disabled={isLoading}
               className={`px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md ${
                 isLoading ? 'opacity-50 cursor-not-allowed' : ''
