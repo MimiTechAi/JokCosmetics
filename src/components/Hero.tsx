@@ -130,7 +130,7 @@ export function Hero() {
                 </span>
               </Button>
             </Link>
-            <Link href="https://wa.me/4917353909280" target="_blank">
+            <Link href="https://wa.me/491735390928" target="_blank">
               <Button 
                 variant="secondary"
                 size="lg"
