@@ -158,9 +158,9 @@ const getCustomerEmailTemplate = (data: any) => `
 
     <h3>Kontakt:</h3>
     <ul>
-      <li>Telefon: <a href="tel:+4915234720022">+49 152 34720022</a></li>
+      <li>Telefon: <a href="tel:+491735390928">+49 173 5390928</a></li>
       <li>E-Mail: <a href="mailto:thansuda22@googlemail.com">thansuda22@googlemail.com</a></li>
-      <li>WhatsApp: <a href="https://wa.me/4915234720022">+49 152 34720022</a></li>
+      <li>WhatsApp: <a href="https://wa.me/491735390928">+49 173 5390928</a></li>
     </ul>
   </div>
 

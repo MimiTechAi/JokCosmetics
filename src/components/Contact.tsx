@@ -49,7 +49,7 @@ export function Contact() {
                   </div>
                   <div>
                     <h3 className="font-medium">Telefon</h3>
-                    <p className="text-gray-600">+49 152 34720022</p>
+                    <p className="text-gray-600">+49 173 5390928</p>
                   </div>
                 </div>
 

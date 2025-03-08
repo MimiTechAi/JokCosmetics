@@ -80,8 +80,8 @@ export default function ContactPage() {
                   </svg>
                   <div>
                     <p className="font-medium">Telefon</p>
-                    <a href="tel:+4915234720022" className="text-gray-600 hover:text-pink-600 transition-colors">
-                      +49 152 34720022
+                    <a href="tel:+491735390928" className="text-gray-600 hover:text-pink-600 transition-colors">
+                      +49 173 5390928
                     </a>
                   </div>
                 </div>
@@ -119,21 +119,39 @@ export default function ContactPage() {
             </div>
           </motion.div>
 
-          {/* Google Maps Einbettung */}
+          {/* Location Karte */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="relative h-[600px] rounded-2xl overflow-hidden shadow-2xl"
+            className="bg-white rounded-2xl shadow-lg p-8 hover:shadow-xl transition-shadow duration-300 flex flex-col items-center justify-center"
           >
-            <iframe
-              ref={iframeRef}
-              title="JOK Cosmetics Standort - Google Maps"
-              data-src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2632.8015937905747!2d8.731752776268386!3d48.76644667131!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47971c3a8c4b3c4d%3A0x1c3b5c3b5c3b5c3b!2sWilhelmstra%C3%9Fe%2017%2C%2075378%20Bad%20Liebenzell"
-              className="w-full h-full border-0"
-              allowFullScreen
-              referrerPolicy="no-referrer-when-downgrade"
-            />
+            <div className="w-full max-w-md mx-auto flex flex-col items-center">
+              <div className="text-pink-500 mb-6">
+                <svg className="w-16 h-16" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                </svg>
+              </div>
+              
+              <h3 className="text-3xl font-bold text-gray-900 mb-6 text-center">Unsere Location</h3>
+              
+              <div className="text-gray-600 text-center mb-8">
+                <p className="text-lg mb-2">Wilhelmstraße 17</p>
+                <p className="text-lg">75378 Bad Liebenzell</p>
+              </div>
+              
+              <a 
+                href="https://www.google.com/maps/place/Wilhelmstra%C3%9Fe+17,+75378+Bad+Liebenzell/@48.7661497,8.7321891,17z/data=!3m1!4b1!4m6!3m5!1s0x47977af49e2af6ef:0x66d8fe28b0a0e7!8m2!3d48.7661497!4d8.7343778!16s%2Fg%2F11csn0l4lk?entry=ttu" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center px-8 py-4 bg-pink-500 hover:bg-pink-600 text-white font-medium rounded-full transition-colors duration-200"
+              >
+                In Google Maps öffnen
+                <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </a>
+            </div>
           </motion.div>
         </div>
       </div>
