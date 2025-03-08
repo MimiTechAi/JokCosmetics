@@ -93,7 +93,7 @@ const services: ServiceData[] = [
     image_url: '/images/WhatsApp Image 2024-10-12 at 20.31.42.jpeg',
     benefits: [
       'Mehr Volumen',
-      '2D-6D Technik',
+      '2D-4D Technik',
       'Natürlicher Look',
       'Lange Haltbarkeit'
     ],
@@ -117,7 +117,7 @@ const services: ServiceData[] = [
     image_url: '/images/WhatsApp Image 2024-10-12 at 20.34.53.jpeg',
     benefits: [
       'Maximales Volumen',
-      '6D-16D Technik',
+      'Ab 5D Technik',
       'Glamour-Effekt',
       'Professionelles Styling'
     ],
