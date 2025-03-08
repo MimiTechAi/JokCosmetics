@@ -39,7 +39,6 @@ const localInter = localFont({
 export const metadata: Metadata = {
   title: 'JOK Cosmetics',
   description: 'Professionelles Permanent Make-up und Wimpernverlängerung in Bad Liebenzell',
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=1',
   icons: {
     icon: '/favicon/favicon.ico',
     shortcut: '/favicon/favicon.ico',
@@ -50,8 +49,15 @@ export const metadata: Metadata = {
     },
   },
   manifest: '/manifest.json',
-  themeColor: '#ffffff',
 }
+
+export const viewport = {
+  themeColor: '#ffffff',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
 
 export default function RootLayout({
   children,
