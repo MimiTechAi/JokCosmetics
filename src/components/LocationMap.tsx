@@ -68,7 +68,6 @@ export default function LocationMap() {
               height="100%"
               className="border-0 rounded-lg"
               allowFullScreen
-              loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
               title="Jok Cosmetics Standort"
               aria-label="Google Maps Karte mit dem Standort von Jok Cosmetics in Bad Liebenzell"

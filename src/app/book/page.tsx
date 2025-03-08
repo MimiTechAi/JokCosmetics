@@ -1,6 +1,6 @@
-import { cookies } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 import { BookingPageClient } from './BookingPageClient';
+import { unstable_noStore as noStore } from 'next/cache';
 
 interface Service {
   id: string;
@@ -16,8 +16,10 @@ interface Service {
 }
 
 async function getServices() {
+  // Verhindern der statischen Generierung für diese Funktion
+  noStore();
+  
   try {
-    const cookieStore = cookies();
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
