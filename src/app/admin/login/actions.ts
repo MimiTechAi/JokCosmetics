@@ -3,8 +3,12 @@
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { unstable_noStore as noStore } from 'next/cache';
 
 export async function loginAction(formData: FormData) {
+  // Verhindern der statischen Generierung
+  noStore();
+  
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
 
@@ -47,6 +51,9 @@ export async function loginAction(formData: FormData) {
 
 export async function clearAllCookies() {
   'use server';
+  // Verhindern der statischen Generierung
+  noStore();
+  
   const cookieStore = await cookies();
   const allCookies = cookieStore.getAll();
   

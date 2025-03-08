@@ -2,8 +2,12 @@ import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import ResetDatabaseButton from './ResetDatabaseButton';
+import { unstable_noStore as noStore } from 'next/cache';
 
 export default async function ResetPage() {
+  // Verhindern der statischen Generierung
+  noStore();
+  
   const supabase = createServerComponentClient({ cookies });
 
   // Prüfe Admin-Berechtigung
