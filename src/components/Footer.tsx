@@ -58,6 +58,11 @@ export default function Footer() {
                   AGB
                 </Link>
               </li>
+              <li>
+                <Link href="/impressum" title="Impressum" className="text-gray-600 hover:text-gray-900">
+                  Impressum
+                </Link>
+              </li>
             </ul>
           </div>
 

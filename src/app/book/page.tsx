@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/types/database';
 import { BookingForm } from '@/components/BookingForm';
 import { PageContainer } from '@/components/PageContainer';
+import { PriceList } from '@/components/PriceList';
 
 interface Service {
   id: string;
@@ -74,40 +75,13 @@ export default async function BookPage() {
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-xl p-8 backdrop-blur-sm bg-opacity-90">
-            <BookingForm services={services} />
+          <div className="bg-white rounded-2xl shadow-xl p-8 backdrop-blur-sm bg-opacity-90 mb-16">
+            <PriceList />
           </div>
 
-          <div className="mt-12 grid md:grid-cols-3 gap-8 text-center">
-            <div className="p-6 rounded-xl bg-white shadow-lg">
-              <div className="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Flexible Termine</h3>
-              <p className="text-gray-600">Wählen Sie aus verschiedenen Terminen, die am besten zu Ihrem Zeitplan passen</p>
-            </div>
-
-            <div className="p-6 rounded-xl bg-white shadow-lg">
-              <div className="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Professioneller Service</h3>
-              <p className="text-gray-600">Genießen Sie erstklassige Behandlungen von unseren erfahrenen Experten</p>
-            </div>
-
-            <div className="p-6 rounded-xl bg-white shadow-lg">
-              <div className="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Sichere Buchung</h3>
-              <p className="text-gray-600">Einfache und sichere Online-Terminbuchung mit sofortiger Bestätigung</p>
-            </div>
+          <div id="booking-form" className="bg-white rounded-2xl shadow-xl p-8 backdrop-blur-sm bg-opacity-90">
+            <h2 className="text-2xl font-semibold mb-6">Termin buchen</h2>
+            <BookingForm services={services} />
           </div>
         </div>
       </div>

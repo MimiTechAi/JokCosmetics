@@ -36,7 +36,7 @@ const services: ServiceData[] = [
     title: 'Powder Brows',
     description: 'Sanft schattierte Augenbrauen für einen natürlichen, pudrigen Look. Ideal für einen weichen, definierten Augenbraueneffekt.',
     duration: '120-180 Min',
-    price: '399€',
+    price: '249€',
     image_url: '/images/WhatsApp Image 2024-10-12 at 20.35.10.jpeg',
     benefits: [
       'Natürlicher, pudrig-weicher Look',
@@ -65,7 +65,7 @@ const services: ServiceData[] = [
     title: 'Permanent Make-up',
     description: 'Professionelle Lippenkonturierung und sanfte Farbpigmentierung für verführerisch volle Lippen mit natürlichem Farbverlauf.',
     duration: '120-180 Min',
-    price: '399€',
+    price: '259€',
     image_url: '/images/WhatsApp Image 2024-10-12 at 20.31.43.jpeg',
     benefits: [
       'Natürlicher Farbverlauf',
@@ -89,7 +89,7 @@ const services: ServiceData[] = [
     title: 'Volume Lashes',
     description: 'Voluminöse Wimpernverlängerung für einen dramatischen Look. Mehrere feine Wimpern pro Naturwimper für mehr Fülle.',
     duration: '120 Min',
-    price: '109€',
+    price: '115€',
     image_url: '/images/WhatsApp Image 2024-10-12 at 20.31.42.jpeg',
     benefits: [
       'Mehr Volumen',
@@ -113,7 +113,7 @@ const services: ServiceData[] = [
     title: 'Mega Volume',
     description: 'Maximales Volumen für einen spektakulären Look. Ultra-leichte Wimpernfächer für einen glamourösen Augenaufschlag.',
     duration: '150 Min',
-    price: '129€',
+    price: '125€',
     image_url: '/images/WhatsApp Image 2024-10-12 at 20.34.53.jpeg',
     benefits: [
       'Maximales Volumen',
@@ -137,7 +137,7 @@ const services: ServiceData[] = [
     title: 'Wispy Lashes',
     description: 'Natürlich geschwungene Wimpernverlängerung für einen verspielten, aber eleganten Look. Perfekte Mischung aus Länge und Volumen.',
     duration: '90 Min',
-    price: '89€',
+    price: '125€',
     image_url: '/images/WhatsApp Image 2024-10-12 at 20.33.49.jpeg',
     benefits: [
       'Natürlicher Look',
