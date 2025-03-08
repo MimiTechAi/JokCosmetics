@@ -45,10 +45,6 @@ const AboutUs = () => {
                 <p className="text-gray-600">Zufriedene Kunden</p>
               </div>
               <div className="text-center p-6 bg-white rounded-lg shadow-lg">
-                <h4 className="text-4xl font-bold text-gold mb-2">100%</h4>
-                <p className="text-gray-600">Qualitätsgarantie</p>
-              </div>
-              <div className="text-center p-6 bg-white rounded-lg shadow-lg">
                 <h4 className="text-4xl font-bold text-gold mb-2">5 ⭐</h4>
                 <p className="text-gray-600">Bewertungen</p>
               </div>

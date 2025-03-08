@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { useState } from 'react';
+import Link from 'next/link';
 
 interface PriceCategory {
   name: string;
@@ -21,15 +22,23 @@ interface PriceService {
 
 interface PriceListProps {
   onSelectService?: (serviceName: string) => void;
+  showBookButtons?: boolean;
+  onServiceSelect?: (serviceId: string) => void;
 }
 
-export function PriceList({ onSelectService }: PriceListProps = {}) {
+export function PriceList({ onSelectService, showBookButtons = false, onServiceSelect }: PriceListProps) {
   const [selectedService, setSelectedService] = useState<string | null>(null);
   
   const handleServiceClick = (serviceName: string) => {
     setSelectedService(serviceName);
     if (onSelectService) {
       onSelectService(serviceName);
+    }
+  };
+
+  const handleBookClick = (serviceName: string) => {
+    if (onServiceSelect) {
+      onServiceSelect(serviceName);
     }
   };
 
@@ -193,60 +202,55 @@ export function PriceList({ onSelectService }: PriceListProps = {}) {
             {category.services.map((service) => (
               <div 
                 key={service.name} 
-                className={`bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transition-all duration-300 ${
+                id={service.name.replace(/\s+/g, '-').toLowerCase()}
+                className={`bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 ${
                   selectedService === service.name 
                     ? 'border-2 border-pink-500 transform scale-[1.02]' 
                     : 'hover:shadow-lg hover:border-pink-200 border-2 border-transparent'
                 }`}
-                onClick={() => handleServiceClick(service.name)}
               >
-                <div className="p-5">
+                <div 
+                  className="p-6 cursor-pointer"
+                  onClick={() => handleServiceClick(service.name)}
+                >
                   <div className="flex justify-between items-start mb-2">
-                    <h4 className="text-lg font-medium">{service.name}</h4>
+                    <h4 className="text-lg font-semibold text-gray-800">{service.name}</h4>
                     <span className="text-xl font-bold text-pink-600">{service.price}</span>
                   </div>
                   
                   {service.description && (
-                    <p className="text-gray-600 text-sm mb-2">{service.description}</p>
+                    <p className="text-gray-600 mb-2">{service.description}</p>
                   )}
                   
                   {service.duration && (
-                    <div className="text-sm text-gray-500">
-                      Dauer: {service.duration}
-                    </div>
-                  )}
-
-                  {service.additionalOptions && service.additionalOptions.length > 0 && (
-                    <div className="mt-3 pt-3 border-t border-gray-100">
-                      <h5 className="text-sm font-medium text-gray-700 mb-2">Nachfüllen:</h5>
-                      <div className="space-y-2">
-                        {service.additionalOptions.map((option) => (
-                          <div key={option.name} className="flex justify-between text-sm">
-                            <span className="text-gray-600">{option.name}</span>
-                            <span className="font-medium">{option.price}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+                    <p className="text-sm text-gray-500">Dauer: {service.duration}</p>
                   )}
                   
-                  <div className={`mt-4 text-center transition-all duration-300 ${
-                    selectedService === service.name ? 'opacity-100' : 'opacity-0'
-                  }`}>
+                  {service.additionalOptions && service.additionalOptions.length > 0 && (
+                    <div className="mt-4 pt-4 border-t border-gray-100">
+                      <p className="text-sm font-medium text-gray-700 mb-2">Nachfüllen:</p>
+                      <ul className="space-y-1">
+                        {service.additionalOptions.map((option) => (
+                          <li key={option.name} className="flex justify-between text-sm">
+                            <span className="text-gray-600">{option.name}</span>
+                            <span className="font-medium text-gray-800">{option.price}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+                
+                {(showBookButtons || onServiceSelect) && (
+                  <div className="px-6 pb-6 pt-2">
                     <button 
-                      className="px-4 py-2 bg-pink-500 text-white rounded-full text-sm font-medium hover:bg-pink-600 transition-colors"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const bookingSection = document.getElementById('booking-form');
-                        if (bookingSection) {
-                          bookingSection.scrollIntoView({ behavior: 'smooth' });
-                        }
-                      }}
+                      onClick={() => handleBookClick(service.name)}
+                      className="block w-full py-2 px-4 bg-pink-500 hover:bg-pink-600 text-white font-medium text-center rounded-md transition-colors duration-300"
                     >
                       Jetzt buchen
                     </button>
                   </div>
-                </div>
+                )}
               </div>
             ))}
           </div>
