@@ -7,6 +7,7 @@ import { Providers } from './providers'
 import { cn } from '@/lib/utils'
 import { Metadata } from 'next'
 import Footer from '@/components/Footer'
+import { Analytics } from '@vercel/analytics/react'
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -75,6 +76,7 @@ export default function RootLayout({
             <Toaster />
           </div>
         </Providers>
+        <Analytics />
       </body>
     </html>
   )

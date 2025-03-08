@@ -33,6 +33,7 @@
     "@swc/core": "^1.10.12",
     "@swc/helpers": "^0.5.15",
     "@types/nodemailer": "^6.4.17",
+    "@vercel/analytics": "^1.5.0",
     "class-variance-authority": "^0.7.1",
     "classnames": "^2.5.1",
     "clsx": "^2.1.1",
