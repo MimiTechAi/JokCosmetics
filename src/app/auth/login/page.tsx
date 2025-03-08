@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import type { Database } from '@/types/supabase';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -11,14 +12,15 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const supabase = createClientComponentClient();
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
 
     try {
+      // Client-seitige Initialisierung des Supabase-Clients
+      const supabase = createClientComponentClient<Database>();
+      
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -116,7 +118,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
-export const viewport = {
-  themeColor: '#ffffff',
-};
