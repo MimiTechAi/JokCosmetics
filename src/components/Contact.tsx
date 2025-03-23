@@ -66,10 +66,10 @@ export function Contact() {
                 </div>
               </div>
 
-              <div className="mt-8">
-                <h2 className="text-xl font-semibold text-pink-500 mb-6">Öffnungszeiten</h2>
-                <div className="text-center py-2">
-                  <span className="text-gray-900">Termin nach Vereinbarung</span>
+              <div className="mt-8 border-t pt-8">
+                <h2 className="text-xl font-semibold text-pink-500 mb-4">Öffnungszeiten</h2>
+                <div className="bg-pink-50/50 rounded-lg p-4 text-center">
+                  <span className="text-gray-900 font-medium text-lg">Nur nach Terminvereinbarung</span>
                 </div>
               </div>
             </div>
