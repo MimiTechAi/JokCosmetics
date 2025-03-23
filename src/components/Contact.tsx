@@ -68,19 +68,8 @@ export function Contact() {
 
               <div className="mt-8">
                 <h2 className="text-xl font-semibold text-pink-500 mb-6">Öffnungszeiten</h2>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Montag - Freitag</span>
-                    <span className="text-gray-900">09:00 - 18:00</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Samstag</span>
-                    <span className="text-gray-900">Nach Vereinbarung</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Sonntag</span>
-                    <span className="text-gray-900">Geschlossen</span>
-                  </div>
+                <div className="text-center py-2">
+                  <span className="text-gray-900">Termin nach Vereinbarung</span>
                 </div>
               </div>
             </div>
